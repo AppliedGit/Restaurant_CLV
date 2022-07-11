@@ -1,1 +1,1 @@
-web: gunicorn --worker-tmp-dir /dev/shm prediction_project.wsgi
+web: gunicorn --worker-tmp-dir /dev/shm Restaurant_CLV.wsgi
