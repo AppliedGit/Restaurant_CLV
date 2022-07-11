@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" />
+    <title>Car Predictive Analysis</title>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+        body,
+        button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #EEEEEE;
+        }
+
+        .bg-dark {
+            background-color: #193940 !important;
+        }
+
+        .footer-text {
+            font-size: 10px;
+            color: #ffffff !important;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: .5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .datatable table tr td,
+        tr th {
+
+            font-size: 11px;
+        }
+
+        table tbody tr td {
+            font-size: 15px;
+        }
+
+        .spinner1 {
+            position: fixed;
+            z-index: 1031;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+        }
+
+        .loading {
+            /* position: fixed; */
+            display: block;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0.5;
+            background-color: #fff;
+            z-index: 99;
+        }
+
+        #overlay {
+            position: absolute;
+            display: none;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .card-header {
+            font-size: 14px
+        }
+
+        @media(max-width: 767px) {
+            .navbar-brand {
+                font-size: 14px;
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        var bar_chart, line_chart, mulit_line_chart, pie_chart;
+        $(document).ready(function () {
+            const chartPie = document.querySelectorAll(".chartPie");
+            const charts = document.querySelectorAll(".chart");
+            const chartMuliaxis = document.querySelectorAll(".chartMultiaxis")
+            const chartLine = document.querySelectorAll(".chartLine");
+
+            chartPie.forEach(function (chart) {
+                var ctx = chart.getContext("2d");
+                pie_chart = new Chart(ctx, {
+                    type: "pie",
+                    data: {
+                        labels: [],
+                        datasets: [
+                            {
+                                data: [],
+                                backgroundColor: [
+                                    "rgba(255, 99, 132, 0.2)",
+                                    "rgba(54, 162, 235, 0.2)",
+                                    "rgba(255, 206, 86, 0.2)",
+                                    "rgba(75, 192, 192, 0.2)",
+                                    "rgba(153, 102, 255, 0.2)",
+                                    "rgba(255, 159, 64, 0.2)",
+                                    "rgb(255, 0, 255)",
+                                    "rgb(0, 255, 0)",
+                                    "rgb(255, 128, 0)",
+                                    "rgb(0, 255, 255)",
+
+                                ],
+                                borderColor: [
+                                    "rgba(255, 99, 132, 1)",
+                                    "rgba(54, 162, 235, 1)",
+                                    "rgba(255, 206, 86, 1)",
+                                    "rgba(75, 192, 192, 1)",
+                                    "rgba(153, 102, 255, 1)",
+                                    "rgba(255, 159, 64, 1)",
+                                ],
+                                borderWidth: 1,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    },
+                });
+            });
+
+            chartLine.forEach(function (chart) {
+                var ctx = chart.getContext("2d");
+                line_chart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: [],
+                        datasets: [
+                            {
+                                label: "Selling Price (in lakhs) ",
+                                data: [],
+                                backgroundColor: [
+                                    "rgba(255, 99, 132, 0.2)",
+                                    "rgba(54, 162, 235, 0.2)",
+                                    "rgba(255, 206, 86, 0.2)",
+                                    "rgba(75, 192, 192, 0.2)",
+                                    "rgba(153, 102, 255, 0.2)",
+                                    "rgba(255, 159, 64, 0.2)",
+                                ],
+                                borderColor: [
+                                    "rgba(255, 99, 132, 1)",
+                                    "rgba(54, 162, 235, 1)",
+                                    "rgba(255, 206, 86, 1)",
+                                    "rgba(75, 192, 192, 1)",
+                                    "rgba(153, 102, 255, 1)",
+                                    "rgba(255, 159, 64, 1)",
+                                ],
+                                borderWidth: 1,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    },
+                });
+            });
+
+            charts.forEach(function (chart) {
+                var ctx = chart.getContext("2d");
+                bar_chart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: [],
+
+                        datasets: [
+                            {
+                                label: "KMS Driven ",
+                                data: [],
+                                backgroundColor: [
+                                    "rgba(255, 99, 132, 0.2)",
+                                    "rgba(54, 162, 235, 0.2)",
+                                    "rgba(255, 206, 86, 0.2)",
+                                    "rgba(75, 192, 192, 0.2)",
+                                    "rgba(153, 102, 255, 0.2)",
+                                    "rgba(255, 159, 64, 0.2)",
+                                    "rgb(255, 0, 255)",
+                                    "rgb(0, 255, 0)",
+                                    "rgb(255, 128, 0)",
+                                    "rgb(0, 255, 255)",
+                                    "rgb(0, 255, 128)",
+                                    "rgb(255, 255, 0)",
+                                    "rgb(0, 255, 191)",
+                                    "rgb(128, 0, 255)",
+                                    "rgb(0, 255, 255)",
+                                    "rgb(230, 240, 255)",
+                                    "rgb(51, 51, 0)",
+                                    "rgb(102, 153, 153)",
+                                    "rgb(204, 255, 153)",
+
+                                ],
+                                borderColor: [
+                                    "rgba(255, 99, 132, 1)",
+                                    "rgba(54, 162, 235, 1)",
+                                    "rgba(255, 206, 86, 1)",
+                                    "rgba(75, 192, 192, 1)",
+                                    "rgba(153, 102, 255, 1)",
+                                    "rgba(255, 159, 64, 1)",
+                                ],
+                                borderWidth: 1,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    },
+                });
+            });
+
+            chartMuliaxis.forEach(function (chart) {
+                var ctx = chart.getContext("2d");
+
+                mulit_line_chart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: [],
+
+                        datasets: [
+                            {
+                                label: "Selling Price",
+                                data: [],
+                                backgroundColor: [
+                                    "rgba(255, 99, 132, 0.2)",
+                                    "rgba(54, 162, 235, 0.2)",
+                                    "rgba(255, 206, 86, 0.2)",
+                                    "rgba(75, 192, 192, 0.2)",
+                                    "rgba(153, 102, 255, 0.2)",
+                                    "rgba(255, 159, 64, 0.2)",
+                                ],
+                                borderColor: [
+                                    "rgba(255, 99, 132, 1)",
+                                    "rgba(54, 162, 235, 1)",
+                                    "rgba(255, 206, 86, 1)",
+                                    "rgba(75, 192, 192, 1)",
+                                    "rgba(153, 102, 255, 1)",
+                                    "rgba(255, 159, 64, 1)",
+                                ],
+                                borderWidth: 1,
+                            }, {
+
+                                label: "Showrroom Price",
+                                data: [],
+                                backgroundColor: [
+                                    "rgba(255, 99, 132, 0.2)",
+                                    "rgba(54, 162, 235, 0.2)",
+                                    "rgba(255, 206, 86, 0.2)",
+                                    "rgba(75, 192, 192, 0.2)",
+                                    "rgba(153, 102, 255, 0.2)",
+                                    "rgba(255, 159, 64, 0.2)",
+                                ],
+                                borderColor: [
+                                    "rgba(255, 99, 132, 1)",
+                                    "rgba(54, 162, 235, 1)",
+                                    "rgba(255, 206, 86, 1)",
+                                    "rgba(75, 192, 192, 1)",
+                                    "rgba(153, 102, 255, 1)",
+                                    "rgba(255, 159, 64, 1)",
+                                ],
+                                borderWidth: 1,
+                            },
+
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    },
+                });
+            });
+
+            display_data_table();
+        });
+
+
+
+        function calculate_selling_price() 
+        {
+            if(sessionStorage.getItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591") !== "9f02f775abea162963140b0c9945229c8fd57d32563fe586540d00d6c984724ddf069e3ef3d2f147a01ce91c19836ea22e66987e33523c2fb3d90cc7bbcd28c8")
+            {
+                if(sessionStorage.getItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591") == null ||sessionStorage.getItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591") !== "51e85deb51c2b909a21ec5b8e83b1cb28da258b1be227620105a345a2bd4c6aea549cd5429670f2df33324667b9f623a420b3a0bdbbd03ad48602211e75478a7")
+                {
+                    sessionStorage.setItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591","Token is missing");
+                    window.location.replace("/d7001cd8ba54d9f28d9b67be256a29ee4ed36da74d45055eaf0c4c0859c3ce9e62e8773ba7f77909b8dc3bd13ef0a67930f954bec6cdf4089013c2c2122e9e35/");
+                }
+            }
+            $("#lbl_error").text(""); $("#lbl_error").show(); $("#lbl_prediction").hide();
+            var year = $("#year").val();
+            var showroom_price = $("#showroom_price").val();
+            var driven_kms = $("#driven_kms").val();
+            var owner_type = $("#owner_type").val();
+            var fuel_type = $("#fuel_type").val();
+            var seller_type = $("#seller_type").val();
+            var transmission_type = $("#transmission_type").val();
+            var current_year = new Date().getFullYear()
+            if (year === "" || year > current_year) {
+                $("#lbl_error").text("Year should be less than or equal to " + current_year); return;
+            }
+            if (showroom_price === "") {
+                $("#lbl_error").text("Enter Showroom price"); return;
+            }
+            if (driven_kms === "") {
+                $("#lbl_error").text("Enter How many How Many Kilometers Drived?"); return;
+            }
+            if (owner_type === "") {
+                $("#lbl_error").text("Enter Number of Owners"); return;
+            }
+            if (fuel_type === "") {
+                $("#lbl_error").text("Select Fuel type?"); return;
+            }
+            if (seller_type === "") {
+                $("#lbl_error").text("Select Dealer or  Individual?"); return;
+            }
+            if (transmission_type === "") {
+                $("#lbl_error").text("Select Transmission Type"); return;
+            }
+            $("#lbl_error").text(""); $("#lbl_error").hide();
+            document.getElementById("overlay").style.display = "flex";
+            $.ajax({
+                url: "/get_prediction_value", data: { "b9297e16791de8e8bff0fb7870682121f94fd89acfd8506be4662e238495141916eed2100b21724a35927e0e7867007c470564c80bf7d9a971d490b817a05e31" : sessionStorage.getItem("b9297e16791de8e8bff0fb7870682121f94fd89acfd8506be4662e238495141916eed2100b21724a35927e0e7867007c470564c80bf7d9a971d490b817a05e31"),
+                    year: year, showroom_price: showroom_price, driven_kms: driven_kms, owner_type: owner_type, fuel_type: fuel_type, seller_type: seller_type, transmission_type: transmission_type},
+                dataType: "json",
+                success: function (result) {
+                    document.getElementById("overlay").style.display = "none";
+                    var token_status = (result["token_status"]);
+                    if (token_status === "Token is missing" || token_status === "Token is Invalid" || token_status === "Token has expired" || token_status.startsWith("Error"))
+                        window.location.replace("/d7001cd8ba54d9f28d9b67be256a29ee4ed36da74d45055eaf0c4c0859c3ce9e62e8773ba7f77909b8dc3bd13ef0a67930f954bec6cdf4089013c2c2122e9e35/");
+                    else {
+                        $("#lbl_prediction").show(); $("#prediction_result").text(parseFloat(result["prediction_val"]).toFixed(3));
+                    }
+
+
+                }
+            });
+        }
+
+        function display_data_table() {
+
+            if(sessionStorage.getItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591") !== "9f02f775abea162963140b0c9945229c8fd57d32563fe586540d00d6c984724ddf069e3ef3d2f147a01ce91c19836ea22e66987e33523c2fb3d90cc7bbcd28c8")
+            {
+                if(sessionStorage.getItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591") == null ||sessionStorage.getItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591") !== "51e85deb51c2b909a21ec5b8e83b1cb28da258b1be227620105a345a2bd4c6aea549cd5429670f2df33324667b9f623a420b3a0bdbbd03ad48602211e75478a7")
+                {
+                    sessionStorage.setItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591","Token is missing");
+                    window.location.replace("/d7001cd8ba54d9f28d9b67be256a29ee4ed36da74d45055eaf0c4c0859c3ce9e62e8773ba7f77909b8dc3bd13ef0a67930f954bec6cdf4089013c2c2122e9e35/");
+                }
+            }            
+
+            $("#year").val("");
+            $("#showroom_price").val("");
+            $("#driven_kms").val("");
+            $("#owner_type").val("");
+            $("#fuel_type").val("");
+            $("#seller_type").val("");
+            $("#transmission_type").val("");
+            $("#prediction_result").text(""); $("#lbl_prediction").hide();
+            $("#main_loading").addClass("loading"); $("#loading_spinner").show();
+            var age_arr = [];
+            $.ajax({
+                url: "/get_prediction_table_data",
+                data : {"b9297e16791de8e8bff0fb7870682121f94fd89acfd8506be4662e238495141916eed2100b21724a35927e0e7867007c470564c80bf7d9a971d490b817a05e31" : sessionStorage.getItem("b9297e16791de8e8bff0fb7870682121f94fd89acfd8506be4662e238495141916eed2100b21724a35927e0e7867007c470564c80bf7d9a971d490b817a05e31")},
+                dataType: "json",
+                success: function (result) {
+                    var token_status = (result["token_status"]);
+                    if (token_status === "Token is missing" || token_status === "Token is Invalid" || token_status === "Token has expired"  || token_status.startsWith("Error"))
+                    {
+                        //sessionStorage.setItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591",token_status);
+                        window.location.replace("/d7001cd8ba54d9f28d9b67be256a29ee4ed36da74d45055eaf0c4c0859c3ce9e62e8773ba7f77909b8dc3bd13ef0a67930f954bec6cdf4089013c2c2122e9e35/");
+                    }                        
+                    else {
+                        sessionStorage.setItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591","9f02f775abea162963140b0c9945229c8fd57d32563fe586540d00d6c984724ddf069e3ef3d2f147a01ce91c19836ea22e66987e33523c2fb3d90cc7bbcd28c8");
+                        var html = "";
+                        $("#tbl_prediction tbody").empty();
+                        $("#tbl_prediction").DataTable().clear().destroy();
+
+                        var current_year = new Date().getFullYear();
+                        var car_arr = []
+                        var diesel_car = 0, petrol_car = 0, cng_car = 0, automatic_car = 0, manual_car = 0, single_owner = 0, multi_owner = 0;
+                        for (var i = 0; i < result["present_price"].length; i++) {
+                            age_arr[i] = (current_year - result["year"][i]);
+                            car_arr[i] = result["car_name"][i] + " " + result["kms_driven"][i];
+                            if (result["fuel_type"][i] === "Petrol")
+                                petrol_car++;
+                            if (result["fuel_type"][i] === "Diesel")
+                                diesel_car++;
+                            if (result["fuel_type"][i] === "CNG")
+                                cng_car++;
+                            if (result["transmission_type"][i] === "Automatic")
+                                automatic_car++;
+                            else
+                                manual_car++;
+                            if (result["owner"][i] === 0)
+                                single_owner++;
+                            else
+                                multi_owner++;
+
+                            html += "                                        <tr>\n" +
+                                "                                            <td>" + result["car_name"][i] + "</td>\n" +
+                                "                                            <td>" + result["year"][i] + "</td>\n" +
+                                "                                            <td>" + result["kms_driven"][i] + "</td>\n" +
+                                "                                            <td>" + result["owner"][i] + "</td>\n" +
+                                "                                            <td>" + result["fuel_type"][i] + "</td>\n" +
+                                "                                            <td>" + result["seller_type"][i] + "</td>\n" +
+                                "                                            <td>" + result["transmission_type"][i] + "</td>\n" +
+                                "                                            <td>" + result["present_price"][i] + "</td>\n" +
+                                "                                            <td><span class=\"badge rounded-pill bg-success\">" + parseFloat(result["selling_price"][i]).toFixed(3) + "</span></td>\n" +
+                                "                                        </tr>";
+                        }
+                        $("#tbl_prediction tbody").html(html);
+                        $("#tbl_prediction").DataTable({ pageLength: 5, "bLengthChange": false, });
+                        $("#lbl_cars").text(result["present_price"].length);
+                        $("#lbl_max_selling_price").text(parseFloat(result["max_selling_price"]).toFixed(3));
+                        $("#lbl_max_showroom_price").text(result["max_showroom_price"]);
+                        $("#lbl_petrol").text(petrol_car);
+                        $("#lbl_diesel").text(diesel_car);
+                        $("#lbl_cng").text(cng_car);
+                        $("#lbl_automatic").text(automatic_car);
+                        $("#lbl_manual").text(manual_car);
+                        $("#lbl_single_owner").text(single_owner);
+                        $("#lbl_multi_owner").text(multi_owner);
+
+                        var count = 0; pie_chart_val = [];
+                        for (var i = 0; i < result["unique_car"].length; i++) {
+                            count = 0;
+                            for (var j = 0; j < result["car_name"].length; j++) {
+                                if (result["unique_car"][i] === result["car_name"][j]) {
+                                    count++;
+                                }
+                            }
+                            pie_chart_val[i] = count;
+                        }
+
+                        bar_chart.data.labels = result["car_name"];
+                        bar_chart.data.datasets[0]["data"] = result["kms_driven"];
+                        bar_chart.update();
+
+                        line_chart.data.labels = age_arr;
+                        line_chart.data.datasets[0]["data"] = result["selling_price"];
+                        line_chart.update();
+
+                        mulit_line_chart.data.labels = result["unique_car"];
+                        mulit_line_chart.data.datasets[0]["data"] = result["selling_price"];
+                        mulit_line_chart.data.datasets[1]["data"] = result["present_price"];
+                        mulit_line_chart.update();
+
+                        pie_chart.data.labels = result["unique_car"];
+                        pie_chart.data.datasets[0]["data"] = pie_chart_val;
+                        pie_chart.update();
+
+
+                        $("#main_loading").removeClass("loading"); $("#loading_spinner").hide();
+                    }
+
+
+                }
+            });
+        }  
+function logout_process()
+{        
+    $.ajax({
+        url: "/logout",
+        data : {"b9297e16791de8e8bff0fb7870682121f94fd89acfd8506be4662e238495141916eed2100b21724a35927e0e7867007c470564c80bf7d9a971d490b817a05e31" : sessionStorage.getItem("b9297e16791de8e8bff0fb7870682121f94fd89acfd8506be4662e238495141916eed2100b21724a35927e0e7867007c470564c80bf7d9a971d490b817a05e31")},        
+        success: function (result) 
+        {                        
+            if(result === "78661b2fac117e9c9764a46403d20579e49974a5aa004922573cf08150c16de8365196319d6662187bde83ae9d6669956a13e2ea22ddb801e15df3887b2252ec")
+            {                
+                sessionStorage.removeItem("b9297e16791de8e8bff0fb7870682121f94fd89acfd8506be4662e238495141916eed2100b21724a35927e0e7867007c470564c80bf7d9a971d490b817a05e31");
+                sessionStorage.removeItem("45270d7fc39f9b812bc348a10c53fe80920ca866eefc4b8e5eefe20590fa319a655ff8e571caf8e757dc83a024b6f3e02063e4780d635636f233c1e6e05f2591");                
+                window.location.replace("/login/");
+            }
+        }
+    });
+}
+    </script>
+</head>
+
+<body>
+
+    <div class="d-flex justify-content-center spinner spinner1  text-info ">
+        <div class="spinner-border" role="status" id="loading_spinner">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <div id="main_loading" class="loading">
+
+
+
+
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="javascript:void(0)">ADRA DEVELOPERS<span
+                        style="font-weight: normal;font-size: 12px;">(Car Predictive Analysis)</span> </a>
+                <button class="navbar-toggler float-xs-right" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mynavbar">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link"></a>
+                        </li>
+                    </ul>
+                    <form class="d-flex">
+                        <a style="text-decoration: none;color: #ffffff;" class="align-self-center">Welcome
+                            Admin</a>&emsp;
+                        <a onclick="display_data_table();" class="btn btn-sm btn-primary">Refresh</a></li>&emsp;
+                        <a href="javascript:logout_process();" class="btn btn-sm btn-danger">Logout</a>
+                    </form>
+                </div>
+            </div>
+        </nav>
+
+
+
+
+        <main class="mt-5 mb-5 pt-3">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card" style="height:98% !important;">
+                                    <div class="card-header">
+                                        <span class="me-2"><i class="fal fa-database"></i></span>
+                                        Overview
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-4  p-1">
+                                                <div class="card">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-danger" id="lbl_cars"></h5>
+                                                        <p class="card-text">Total Number of Cars</p>
+                                                        <i class="fal fa-cars fa-2x text-info"></i>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4  p-1">
+                                                <div class="card">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-danger" id="lbl_max_selling_price">
+                                                        </h5>
+                                                        <p class="card-text " style="font-size:14px;">Maximum Selling
+                                                            Price (in Laks)</p>
+                                                        <i class="fal fa-car fa-2x text-info"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4  p-1">
+                                                <div class="card">
+
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-danger" id="lbl_max_showroom_price">
+                                                        </h5>
+                                                        <p class="card-text" style="font-size:12.5px;">Max Showroom
+                                                            Price (in Laks)</p>
+                                                        <i class="fal fa-car-building fa-2x text-info"></i>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4  p-1">
+                                                <div class="card">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-danger"><span id="lbl_petrol"></span>
+                                                            <span class="text-info">&#124;</span> <span
+                                                                id="lbl_diesel"></span>
+                                                            <span class="text-info">&#124;</span> <span id="lbl_cng">
+                                                            </span>
+                                                        </h5>
+                                                        <p class="card-text"><span>Petrol</span> <span
+                                                                class="text-success">&#124;</span><span> Diesel</span>
+                                                            <span class="text-success">&#124;</span><span>CNG</span>
+                                                        </p>
+                                                        <p style="font-size: 12px;" class="text-success">(Fuel type)</p>
+                                                        <i class="fal fa-gas-pump fa-2x text-info"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4  p-1">
+                                                <div class="card">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-danger"><span
+                                                                id="lbl_automatic"></span> <span
+                                                                class="text-info">&#124;</span> <span
+                                                                id="lbl_manual"></span></h5>
+                                                        <p class="card-text"><span>Auto</span> <span
+                                                                class="text-success">&#124;</span><span> Manual</span>
+                                                        </p>
+                                                        <p style="font-size: 12px;" class="text-success">(Transmission
+                                                            type)
+                                                        </p>
+                                                        <i class="fal fa-car-mechanic fa-2x text-info"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4  p-1">
+                                                <div class="card">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-danger"><span
+                                                                id="lbl_single_owner"></span> <span
+                                                                class="text-info">&#124;</span> <span
+                                                                id="lbl_multi_owner"></span></h5>
+                                                        <p class="card-text"><span>Single</span> <span
+                                                                class="text-success">&#124;</span><span>
+                                                                Multiple</span></p>
+                                                        <p style="font-size: 12px;" class="text-success">(Number of
+                                                            Owners)
+                                                        </p>
+                                                        <i class="fal fa-users fa-2x text-info"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+
+                                <div class="card" style="height:98% !important;">
+
+                                    <div class="card-header">
+                                        <span><i class="fal fa-table"></i></span> Sales Information
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="tbl_prediction" class="table  data-table text-center"
+                                                style="width: 100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Car Name</th>
+                                                        <th>Year</th>
+                                                        <th>Kms Driven</th>
+                                                        <th>Owner</th>
+                                                        <th>Fuel Type</th>
+                                                        <th>Seller</th>
+                                                        <th>Transmission</th>
+                                                        <th>Present Price</th>
+                                                        <th>Selling Price</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th>Car Name</th>
+                                                        <th>Year</th>
+                                                        <th>Kms Driven</th>
+                                                        <th>Owner</th>
+                                                        <th>Fuel Type</th>
+                                                        <th>Seller</th>
+                                                        <th>Transmission</th>
+                                                        <th>Present Price</th>
+                                                        <th>Selling Price</th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <div class="card" style="height: 98% !important;background-color: #d7ecfb;">
+                                    <div class="card-header text-success">
+                                        <span class="me-2"><i class="fas fa-calculator-alt"></i></span>
+                                        Predictive Analysis
+                                    </div>
+                                    <div class="card-body justify-content-center align-items-center">
+                                        <div id="overlay">
+                                            <div class="w-100 d-flex justify-content-center align-items-center">
+                                                <div class="spinner spinner-border text-primary"></div>
+                                            </div>
+                                        </div>
+                                        <form>
+                                            <div class="mb-3 input-group input-group-sm">
+                                                <input type="number" class="form-control" id="year" name="year" value=""
+                                                    placeholder="Year" aria-describedby="emailHelp"
+                                                    style="font-size: 11px;">
+                                            </div>
+                                            <div class="mb-3 input-group input-group-sm">
+                                                <input type="number" class="form-control" id="showroom_price"
+                                                    name="showroom_price" value=""
+                                                    placeholder="Showroom Price?(In lakhs)" style="font-size: 11px;">
+                                            </div>
+                                            <div class="mb-3 input-group input-group-sm">
+                                                <input type="number" class="form-control" id="driven_kms"
+                                                    name="driven_kms" value="" style="font-size: 11px;"
+                                                    placeholder="How Many Kilometers Drived?">
+                                            </div>
+                                            <div class="mb-3 input-group input-group-sm">
+                                                <input type="number" class="form-control" id="owner_type"
+                                                    name="owner_type" value="" style="font-size: 11px;"
+                                                    placeholder="Number of Owners?">
+                                            </div>
+                                            <div class="mb-3">
+                                                <select class="form-select form-select-sm"
+                                                    aria-label="Default select example" style="font-size: 11px;"
+                                                    id="fuel_type" name="fuel_type">
+                                                    <option selected value="">What Is the Fuel type?</option>
+                                                    <option value="1">Petrol</option>
+                                                    <option value="2">Diesel</option>
+                                                    <option value="3">CNG</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <select class="form-select form-select-sm" style="font-size: 11px;"
+                                                    id="seller_type" name="seller_type"
+                                                    aria-label="Default select example">
+                                                    <option selected value="">are you a Dealer or
+                                                        Individual?</option>
+                                                    <option value="1">Dealer</option>
+                                                    <option value="2">Individual</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <select class="form-select form-select-sm" style="font-size: 11px;"
+                                                    id="transmission_type" name="transmission_type"
+                                                    aria-label="Default select example">
+                                                    <option selected value="">Transmission Type</option>
+                                                    <option value="1">Manual Car</option>
+                                                    <option value="2">Automatic Car</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <div class="d-grid">
+                                                    <button class="btn btn-danger btn-sm" type="button"
+                                                        onclick="calculate_selling_price();">Predict Selling
+                                                        Price</button>
+                                                </div>
+                                            </div>
+                                            <h6 class="card-title text-center" id="lbl_prediction"
+                                                style="font-size:12px;display: none;">Your Selling Price is (in Lakhs)
+                                                <td>
+                                                    <h5 class="text-primary text-center" id="prediction_result"></h5>
+                                                </td>
+                                            </h6>
+                                            <div class="text-danger text-center" style="font-size: 10px;;"
+                                                id="lbl_error"></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span class="me-2"><i class="fal fa-chart-bar"></i></span>
+                                        Cars (VS) KMS Driven
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas class="chart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span class="me-2"><i class="fal fa-chart-line"></i></span>
+                                        Car's Age (VS) Selling Price
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas class="chartLine" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span class="me-2"><i class="fal fa-chart-line"></i></span>
+                                        Cars (VS) Prices
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas class="chartMultiaxis" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span class="me-2"><i class="fal fa-chart-pie"></i></span>
+                                        Cars
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas class="chartPie"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <nav class="navbar fixed-bottom navbar-dark bg-dark py-0">
+            <div class="container justify-content-center">
+                <span class="navbar-text footer-text" href="#">Copyright 2022 © <a>Adra Developers</a></span>
+            </div>
+        </nav>
+    </div>
+</body>
+
+</html>
