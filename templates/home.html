@@ -25,9 +25,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
 
 
-    <script src="https://unpkg.com/chartjs-chart-geo@3.8.0/build/index.umd.min.js"></script>
-    <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
-    <script src="https://unpkg.com/chartjs-plugin-datalabels@2.0.0-rc.1/dist/chartjs-plugin-datalabels.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://rawgit.com/Anujarya300/bubble_maps/master/data/geography-data/datamaps.none.js"></script>
 
     <title>ADRA</title>
     <style>
@@ -77,6 +77,32 @@
         .active {
             color: #19875f !important;
         }
+
+        #fa_loading {
+            position: absolute;
+            display: flex;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            cursor: pointer;
+
+        }
+
+        .dropdown-item.active,
+        .dropdown-item:active {
+            background-color: #a3a3a3;
+            ;
+        }
+
+        .datamap {
+            margin-left: -230px;
+            margin-top: -80px;
+            width: 800px;
+            height: 415px;
+        }
     </style>
     <script type="text/javascript">
 
@@ -104,13 +130,13 @@
                                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                             },
 
-                            // {
-                            //     label: "Unknown",
-                            //     hidden: true,
-                            //     data: [],
-                            //     borderColor: "rgba(255, 99, 132, 0.2)",
-                            //     backgroundColor: "rgba(255, 99, 132, 0.2)",
-                            // }
+                            {
+                                label: "Unknown",
+                                hidden: true,
+                                data: [],
+                                borderColor: "rgba(255, 99, 132, 0.2)",
+                                backgroundColor: "rgba(255, 99, 132, 0.2)",
+                            }
                         ],
                     },
                     options: {
@@ -141,8 +167,8 @@
                                     //   return `${context[0].label} Day: ${weekarray[context[0].dataIndex]}`
                                     // },
                                     afterTitle: function (context) {
-
-                                        //return 'Average CLV:' + avg_clv[context[0].dataIndex];
+                                        return 'Average CLV';
+                                        // return 'Average CLV:' + avg_clv[context[0].dataIndex];
                                     },
                                     beforeBody: function (context) {
                                         // const newLineArray = [];
@@ -290,129 +316,76 @@
                 });
                 $("#test").click(function () {
                     prediction_graph.resetZoom();
+                });
             });
-            });
-            
+
             display_dasboard_data();
             get_location();
 
 
-            Promise.all([
-                fetch("https://unpkg.com/us-atlas/states-10m.json").then((r) => r.json()),
-                fetch(
-                    "https://gist.githubusercontent.com/mbostock/9535021/raw/928a5f81f170b767162f8f52dbad05985eae9cac/us-state-capitals.csv"
-                )
-                    .then((r) => r.text())
-                    .then((d) => Papa.parse(d, { dynamicTyping: true, header: true }).data)
-            ]).then(([us, data]) => {
-                const states = ChartGeo.topojson.feature(us, us.objects.states).features;
-
-                const chart = new Chart(document.getElementById("canvas").getContext("2d"), {
-                    type: "bubbleMap",
-                    data: {
-                        labels: data.map((d) => d.description),
-                        datasets: [
-                            {
-                                outline: states,
-                                showOutline: true,
-                                backgroundColor: "steelblue",
-                                data: data.map((d) =>
-                                    Object.assign(d, { value: Math.round(Math.random() * 10) })
-                                )
-                            }
-                        ]
-                    },
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            datalabels: {
-                                align: "top",
-                                formatter: (v) => {
-                                    return v.description;
-                                }
-                            }
-                        },
-                        scales: {
-                            xy: {
-                                projection: "albersUsa"
-                            },
-                            r: {
-                                size: [1, 20]
-                            }
-                        }
+            $("#selectpicker").change(function () {
+                $(this).find("option:selected").each(function () {
+                    var optionValue = $(this).attr("value");
+                    if (optionValue) {
+                        $(".box").not("." + optionValue).hide();
+                        $("." + optionValue).show();
+                    } else {
+                        $(".box").hide();
                     }
                 });
-            });
-            // $("select").change(function () {
-            //     $(this).find("option:selected").each(function () {
-            //         var optionValue = $(this).attr("value");
-            //         if (optionValue) {
-            //             $(".box").not("." + optionValue).hide();
-            //             $("." + optionValue).show();
-            //         } else {
-            //             $(".box").hide();
-            //         }
-            //     });
-            // }).change();
+            }).change();
 
-            // // To style all selects
+            // To style all selects
+            $('.selectpicker').selectpicker();
+            $('.selectpicker1').selectpicker();
+            $('.selectpicker2').selectpicker();
+
+
+            // To style all selects
             // $('.selectpicker').selectpicker();
+            // $('.selectpicker1').selectpicker();
+            // $('.selectpicker2').selectpicker();
+
+
+
+
+
         });
+
 
         function display_dasboard_data() {
             $.ajax({
                 url: "/get_time_series_data",
                 success: function (result) {
+
+
                     prediction_graph.data.labels = result["prediction_graph"]["day_of_year"];
                     prediction_graph.data.datasets[0]["data"] = result["prediction_graph"]["prediction_val"];
                     prediction_graph.data.datasets[1]["data"] = result["prediction_graph"]["transaction_val"];
+                    // console.log(prediction_graph.options.plugins.tooltip.callbacks);
+
                     prediction_graph.update();
                     // alert(result["analytics_graph"]["age_category"])
-                    age_based_analytics_graph.data.labels = result["analytics_graph"]["age_category"];
+
+                    var analytics_label_arr = result["analytics_graph"]["age_category"];
+                    analytics_label_arr[7] = "Unknown";
+                    age_based_analytics_graph.data.labels = analytics_label_arr;
                     age_based_analytics_graph.data.datasets[0]["data"] = result["analytics_graph"]["age_category_rev_percentage"];
-                    //age_based_analytics_graph.data.datasets[1]["data"] = ["1,2,3,4,5,6"];
+                    age_based_analytics_graph.data.datasets[1]["data"] = [0, 0, 0, 0, 0, 0, 0, parseFloat(result["analytics_graph_unknown"])];
                     age_based_analytics_graph.update();
+
+
 
                     revenue_graph.data.labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                     revenue_graph.data.datasets[0]["data"] = result["revenue_graph"]["transaction_value"];
                     revenue_graph.update();
 
                     fill_segment_table_data(result);
-                    
 
-                    $("#cus_sel").text(result["executive_summary"]["customers_selected"]);
-                    $("#cus_pre").text(result["executive_summary"]["customers_prev"]);
-                    $("#cus_cha").text(result["executive_summary"]["customers_changes"]);
+                    fill_executive_summary_data(result);
 
-                    $("#ord_sel").text(result["executive_summary"]["orders_selected"]);
-                    $("#ord_pre").text(result["executive_summary"]["orders_prev"]);
-                    $("#ord_cha").text(result["executive_summary"]["orders_changes"]);
+                    display_map(result["prediction_graph"]);
 
-                    $("#rev_sel").text(parseFloat(result["executive_summary"]["revenue_selected"]).toFixed(2));
-                    $("#rev_pre").text(parseFloat(result["executive_summary"]["revenue_prev"]).toFixed(2));
-                    $("#rev_cha").text(result["executive_summary"]["revenue_changes"]);
-
-                    $("#aov_sel").text(parseFloat(result["executive_summary"]["aov_selected"]).toFixed(2));
-                    $("#aov_pre").text(parseFloat(result["executive_summary"]["aov_prev"]).toFixed(2));
-                    $("#aov_cha").text(result["executive_summary"]["aov_changes"]);
-
-                    $("#newcus_sel").text(result["executive_summary"]["new_customers_selected"]);
-                    $("#newcus_pre").text(result["executive_summary"]["new_customers_prev"]);
-                    $("#newcus_cha").text(result["executive_summary"]["new_customers_changes"]);
-
-                    $("#rep_sel").text(result["executive_summary"]["repeat_customers_selected"]);
-                    $("#rep_pre").text(result["executive_summary"]["repeat_customers_prev"]);
-                    $("#rep_cha").text(result["executive_summary"]["repeat_customers_changes"]);
-
-                    $("#churn_sel").text(result["executive_summary"]["churn_customers_selected"]);
-                    $("#churn_pre").text(result["executive_summary"]["churn_customers_prev"]);
-                    $("#churn_cha").text(result["executive_summary"]["churn_customers_changes"]);
-
-                    $("#acl_sel").text(parseFloat(result["executive_summary"]["aclv_customers_selected"]).toFixed(2));
-                    $("#acl_pre").text(parseFloat(result["executive_summary"]["aclv_customers_prev"]).toFixed(2));
-                    $("#acl_cha").text(result["executive_summary"]["aclv_customers_changes"]);
                 }
             });
 
@@ -427,82 +400,88 @@
                         $("#age_location_list").append("<option >" + result[i] + "</option>");
                         $("#revenue_location_list").append("<option >" + result[i] + "</option>");
                         $("#excutive_summary_list").append("<option >" + result[i] + "</option>");
-                        
+
                     }
-                    
+
                     $("#age_location_list").selectpicker();
-                    $("#revenue_location_list").selectpicker();                                                          
-                    $("#segment_location_list").selectpicker('');
-                    $("#excutive_summary_list").selectpicker();  
+                    $("#revenue_location_list").selectpicker();
+                    $("#segment_location_list").selectpicker();
+                    $("#excutive_summary_list").selectpicker();
 
                 }
             });
         }
 
-        
+
         function location_based_customer_segmentation() {
             var location = $("#segment_location_list :selected").text();
             $.ajax({
                 url: "/location_based_segment_data?location=" + location,
                 success: function (result) {
-                    
-                    $("#loy_users").text(result["loyal_cus_clv"]["users"]);
-                    $("#loy_freq").text(result["loyal_cus_clv"]["frequency"]);
-                    $("#loy_aov").text(result["loyal_cus_clv"]["aov"]);
-                    $("#loy_clv").text(result["loyal_cus_clv"]["clv"]);
-                    $("#loy_rev").text(result["loyal_cus_clv"]["revenue"]);
+                    fill_segment_table_data(result);
 
-                    $("#rep_users").text(result["repeat_cus_clv"]["users"]);
-                    $("#rep_freq").text(result["repeat_cus_clv"]["frequency"]);
-                    $("#rep_aov").text(result["repeat_cus_clv"]["aov"]);
-                    $("#rep_clv").text(result["repeat_cus_clv"]["clv"]);
-                    $("#rep_rev").text(result["repeat_cus_clv"]["revenue"]);
+                    // $("#loy_users").text(result["loyal_cus_clv"]["users"]);
+                    // $("#loy_freq").text(result["loyal_cus_clv"]["frequency"]);
+                    // $("#loy_aov").text(result["loyal_cus_clv"]["aov"]);
+                    // $("#loy_clv").text(result["loyal_cus_clv"]["clv"]);
+                    // $("#loy_rev").text(result["loyal_cus_clv"]["revenue"]);
 
-                    $("#cus_users").text(result["all_cus_clv"]["users"]);
-                    $("#cus_freq").text(result["all_cus_clv"]["frequency"]);
-                    $("#cus_aov").text(result["all_cus_clv"]["aov"]);
-                    $("#cus_clv").text(result["all_cus_clv"]["clv"]);
-                    $("#cus_rev").text(result["all_cus_clv"]["revenue"]);
+                    // $("#rep_users").text(result["repeat_cus_clv"]["users"]);
+                    // $("#rep_freq").text(result["repeat_cus_clv"]["frequency"]);
+                    // $("#rep_aov").text(result["repeat_cus_clv"]["aov"]);
+                    // $("#rep_clv").text(result["repeat_cus_clv"]["clv"]);
+                    // $("#rep_rev").text(result["repeat_cus_clv"]["revenue"]);
 
-                    $("#top_users").text(result["top_cus_clv"]["users"]);
-                    $("#top_freq").text(result["top_cus_clv"]["frequency"]);
-                    $("#top_aov").text(result["top_cus_clv"]["aov"]);
-                    $("#top_clv").text(result["top_cus_clv"]["clv"]);
-                    $("#top_rev").text(result["top_cus_clv"]["revenue"]);
+                    // $("#cus_users").text(result["all_cus_clv"]["users"]);
+                    // $("#cus_freq").text(result["all_cus_clv"]["frequency"]);
+                    // $("#cus_aov").text(result["all_cus_clv"]["aov"]);
+                    // $("#cus_clv").text(result["all_cus_clv"]["clv"]);
+                    // $("#cus_rev").text(result["all_cus_clv"]["revenue"]);
 
-                    $("#bottom_users").text(result["low_cus_clv"]["users"]);
-                    $("#bottom_freq").text(result["low_cus_clv"]["frequency"]);
-                    $("#bottom_aov").text(result["low_cus_clv"]["aov"]);
-                    $("#bottom_clv").text(result["low_cus_clv"]["clv"]);
-                    $("#bottom_rev").text(result["low_cus_clv"]["revenue"]);
+                    // $("#top_users").text(result["top_cus_clv"]["users"]);
+                    // $("#top_freq").text(result["top_cus_clv"]["frequency"]);
+                    // $("#top_aov").text(result["top_cus_clv"]["aov"]);
+                    // $("#top_clv").text(result["top_cus_clv"]["clv"]);
+                    // $("#top_rev").text(result["top_cus_clv"]["revenue"]);
 
-                    $("#risk_users").text(result["risk_cus_clv"]["users"]);
-                    $("#risk_freq").text(result["risk_cus_clv"]["frequency"]);
-                    $("#risk_aov").text(result["risk_cus_clv"]["aov"]);
-                    $("#risk_clv").text(result["risk_cus_clv"]["clv"]);
-                    $("#risk_rev").text(result["risk_cus_clv"]["revenue"]);
+                    // $("#bottom_users").text(result["low_cus_clv"]["users"]);
+                    // $("#bottom_freq").text(result["low_cus_clv"]["frequency"]);
+                    // $("#bottom_aov").text(result["low_cus_clv"]["aov"]);
+                    // $("#bottom_clv").text(result["low_cus_clv"]["clv"]);
+                    // $("#bottom_rev").text(result["low_cus_clv"]["revenue"]);
 
-                    $("#churn_users").text(result["churn_cus_clv"]["users"]);
-                    $("#churn_freq").text(result["churn_cus_clv"]["frequency"]);
-                    $("#churn_aov").text(result["churn_cus_clv"]["aov"]);
-                    $("#churn_clv").text(result["churn_cus_clv"]["clv"]);
-                    $("#churn_rev").text(result["churn_cus_clv"]["revenue"]);
+                    // $("#risk_users").text(result["risk_cus_clv"]["users"]);
+                    // $("#risk_freq").text(result["risk_cus_clv"]["frequency"]);
+                    // $("#risk_aov").text(result["risk_cus_clv"]["aov"]);
+                    // $("#risk_clv").text(result["risk_cus_clv"]["clv"]);
+                    // $("#risk_rev").text(result["risk_cus_clv"]["revenue"]);
+
+                    // $("#churn_users").text(result["churn_cus_clv"]["users"]);
+                    // $("#churn_freq").text(result["churn_cus_clv"]["frequency"]);
+                    // $("#churn_aov").text(result["churn_cus_clv"]["aov"]);
+                    // $("#churn_clv").text(result["churn_cus_clv"]["clv"]);
+                    // $("#churn_rev").text(result["churn_cus_clv"]["revenue"]);
 
                 }
             });
         }
+
         function location_based_age_graph() {
             var location = $("#age_location_list :selected").text();
             $.ajax({
                 url: "/age_based_location_data?location=" + location,
                 success: function (result) {
-                    age_based_analytics_graph.data.labels = result["analytics_graph"]["age_category"];
+                    var analytics_label_arr = result["analytics_graph"]["age_category"];
+                    analytics_label_arr[7] = "Unknown";
+                    age_based_analytics_graph.data.labels = analytics_label_arr;
                     age_based_analytics_graph.data.datasets[0]["data"] = result["analytics_graph"]["age_category_rev_percentage"];
+                    age_based_analytics_graph.data.datasets[1]["data"] = [0, 0, 0, 0, 0, 0, 0, parseFloat(result["analytics_graph_unknown"])];
                     age_based_analytics_graph.update();
 
                 }
             });
         }
+
         function location_based_revenue_graph() {
             var location = $("#revenue_location_list :selected").text();
             $.ajax({
@@ -516,93 +495,718 @@
             });
         }
 
-        function location_based_excutive_summary(result)
-        {
-            $("#fa_loading").show();
+        function location_based_excutive_summary(result) {
+
+            $("#msg_alert").html("");
+            var month = 0;
+            var year = 2021;
+            var filter_type = $("#selectpicker").val();
+            var filter_values = "";
             var location = $("#excutive_summary_list :selected").text();
+            if (filter_type == "green") {
+                year = $("#year_list").val();
+                month = $("#month_list").val();
+                if (year == "") {
+                    $("#msg_alert").html("<div class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\" ><strong>Warning!</strong> Select Year\n" +
+                        "                                    <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"\n" +
+                        "                                        aria-label=\"Close\"></button></div>");
+                    return;
+                }
+                if (month == "") {
+                    month = 0;
+                }
+                filter_values = "&year_val=" + year + "&month_val=" + month;
+
+
+            }
+            else {
+                var from_date = $("#from_date").val();
+                var to_date = $("#to_date").val();
+                if (from_date == "" || to_date == "") {
+                    $("#msg_alert").html("<div class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\" ><strong>Warning!</strong> Select From Date and To Date.\n" +
+                        "                                    <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"\n" +
+                        "                                        aria-label=\"Close\"></button></div>");
+                    return;
+                }
+                filter_values = "&start_dt_val=" + from_date + "&end_dt_val=" + to_date;
+            }
+            $("#fa_loading").show();
+            console.log(filter_values)
+            setTimeout(function () { $("#fa_loading").hide(); }, 20000);
+
             $.ajax({
-                url: "/location_based_excutive_summary?location=" + location,
+                url: "/location_based_excutive_summary?location=" + location + filter_values,
                 success: function (result) {
+
                     $("#fa_loading").hide();
-                    $("#cus_sel").text(result["executive_summary"]["customers_selected"]);
-                    $("#cus_pre").text(result["executive_summary"]["customers_prev"]);
-                    $("#cus_cha").text(result["executive_summary"]["customers_changes"]);
+                    fill_executive_summary_data(result);
 
-                    $("#ord_sel").text(result["executive_summary"]["orders_selected"]);
-                    $("#ord_pre").text(result["executive_summary"]["orders_prev"]);
-                    $("#ord_cha").text(result["executive_summary"]["orders_changes"]);
 
-                    $("#rev_sel").text(parseFloat(result["executive_summary"]["revenue_selected"]).toFixed(2));
-                    $("#rev_pre").text(parseFloat(result["executive_summary"]["revenue_prev"]).toFixed(2));
-                    $("#rev_cha").text(result["executive_summary"]["revenue_changes"]);
-
-                    $("#aov_sel").text(parseFloat(result["executive_summary"]["aov_selected"]).toFixed(2));
-                    $("#aov_pre").text(parseFloat(result["executive_summary"]["aov_prev"]).toFixed(2));
-                    $("#aov_cha").text(result["executive_summary"]["aov_changes"]);
-
-                    $("#newcus_sel").text(result["executive_summary"]["new_customers_selected"]);
-                    $("#newcus_pre").text(result["executive_summary"]["new_customers_prev"]);
-                    $("#newcus_cha").text(result["executive_summary"]["new_customers_changes"]);
-
-                    $("#rep_sel").text(result["executive_summary"]["repeat_customers_selected"]);
-                    $("#rep_pre").text(result["executive_summary"]["repeat_customers_prev"]);
-                    $("#rep_cha").text(result["executive_summary"]["repeat_customers_changes"]);
-
-                    $("#churn_sel").text(result["executive_summary"]["churn_customers_selected"]);
-                    $("#churn_pre").text(result["executive_summary"]["churn_customers_prev"]);
-                    $("#churn_cha").text(result["executive_summary"]["churn_customers_changes"]);
-
-                    $("#acl_sel").text(parseFloat(result["executive_summary"]["aclv_customers_selected"]).toFixed(2));
-                    $("#acl_pre").text(parseFloat(result["executive_summary"]["aclv_customers_prev"]).toFixed(2));
-                    $("#acl_cha").text(result["executive_summary"]["aclv_customers_changes"]);
 
                 }
             });
         }
 
-        function fill_segment_table_data(result)
-        {
-                    $("#loy_users").text(result["loyal_cus_clv"]["users"]);
-                    $("#loy_freq").text(result["loyal_cus_clv"]["frequency"]);
-                    $("#loy_aov").text(parseFloat(result["loyal_cus_clv"]["aov"]).toFixed(2));
-                    $("#loy_clv").text(parseFloat(result["loyal_cus_clv"]["clv"]).toFixed(2));
-                    $("#loy_rev").text(parseFloat(result["loyal_cus_clv"]["revenue"]).toFixed(2));
+        function fill_executive_summary_data(result) {
+            if (Object.keys(result["executive_summary"]).length > 0) {
+                $("#cus_sel").text(display_int_value(result["executive_summary"]["customers_selected"]));
+                $("#cus_pre").text(display_int_value(result["executive_summary"]["customers_prev"]));
+                $("#cus_cha").text(display_int_value(result["executive_summary"]["customers_changes"]));
 
-                    $("#rep_users").text(result["repeat_cus_clv"]["users"]);
-                    $("#rep_freq").text(parseFloat(result["repeat_cus_clv"]["frequency"]).toFixed(2));
-                    $("#rep_aov").text(parseFloat(result["repeat_cus_clv"]["aov"]).toFixed(2));
-                    $("#rep_clv").text(parseFloat(result["repeat_cus_clv"]["clv"]).toFixed(2));
-                    $("#rep_rev").text(parseFloat(result["repeat_cus_clv"]["revenue"]).toFixed(2));
+                $("#ord_sel").text(display_int_value(result["executive_summary"]["orders_selected"]));
+                $("#ord_pre").text(display_int_value(result["executive_summary"]["orders_prev"]));
+                $("#ord_cha").text(display_int_value(result["executive_summary"]["orders_changes"]));
 
-                    $("#cus_users").text(result["all_cus_clv"]["users"]);
-                    $("#cus_freq").text(parseFloat(result["all_cus_clv"]["frequency"]).toFixed(2));
-                    $("#cus_aov").text(parseFloat(result["all_cus_clv"]["aov"]).toFixed(2));
-                    $("#cus_clv").text(parseFloat(result["all_cus_clv"]["clv"]).toFixed(2));
-                    $("#cus_rev").text(parseFloat(result["all_cus_clv"]["revenue"]).toFixed(2));
+                $("#rev_sel").text(display_float_value(result["executive_summary"]["revenue_selected"]));
+                $("#rev_pre").text(display_float_value(result["executive_summary"]["revenue_prev"]));
+                $("#rev_cha").text(display_float_value(result["executive_summary"]["revenue_changes"]));
 
-                    $("#top_users").text(result["top_cus_clv"]["users"]);
-                    $("#top_freq").text(parseFloat(result["top_cus_clv"]["frequency"]).toFixed(2));
-                    $("#top_aov").text(parseFloat(result["top_cus_clv"]["aov"]).toFixed(2));
-                    $("#top_clv").text(parseFloat(result["top_cus_clv"]["clv"]).toFixed(2));
-                    $("#top_rev").text(parseFloat(result["top_cus_clv"]["revenue"]).toFixed(2));
+                $("#aov_sel").text(display_float_value(result["executive_summary"]["aov_selected"]));
+                $("#aov_pre").text(display_float_value(result["executive_summary"]["aov_prev"]));
+                $("#aov_cha").text(display_float_value(result["executive_summary"]["aov_changes"]));
 
-                    $("#bottom_users").text(result["low_cus_clv"]["users"]);
-                    $("#bottom_freq").text(parseFloat(result["low_cus_clv"]["frequency"]).toFixed(2));
-                    $("#bottom_aov").text(parseFloat(result["low_cus_clv"]["aov"]).toFixed(2));
-                    $("#bottom_clv").text(parseFloat(result["low_cus_clv"]["clv"]).toFixed(2));
-                    $("#bottom_rev").text(parseFloat(result["low_cus_clv"]["revenue"]).toFixed(2));
+                $("#newcus_sel").text(display_int_value(result["executive_summary"]["new_customers_selected"]));
+                $("#newcus_pre").text(display_int_value(result["executive_summary"]["new_customers_prev"]));
+                $("#newcus_cha").text(display_int_value(result["executive_summary"]["new_customers_changes"]));
 
-                    $("#risk_users").text(result["risk_cus_clv"]["users"]);
-                    $("#risk_freq").text(parseFloat(result["risk_cus_clv"]["frequency"]).toFixed(2));
-                    $("#risk_aov").text(parseFloat(result["risk_cus_clv"]["aov"]).toFixed(2));
-                    $("#risk_clv").text(parseFloat(result["risk_cus_clv"]["clv"]).toFixed(2));
-                    $("#risk_rev").text(parseFloat(result["risk_cus_clv"]["revenue"]).toFixed(2));
+                $("#rep_sel").text(display_int_value(result["executive_summary"]["repeat_customers_selected"]));
+                $("#rep_pre").text(display_int_value(result["executive_summary"]["repeat_customers_prev"]));
+                $("#rep_cha").text(display_int_value(result["executive_summary"]["repeat_customers_changes"]));
 
-                    $("#churn_users").text(result["churn_cus_clv"]["users"]);
-                    $("#churn_freq").text(parseFloat(result["churn_cus_clv"]["frequency"]).toFixed(2));
-                    $("#churn_aov").text(parseFloat(result["churn_cus_clv"]["aov"]).toFixed(2));
-                    $("#churn_clv").text(parseFloat(result["churn_cus_clv"]["clv"]).toFixed(2));
-                    $("#churn_rev").text(parseFloat(result["churn_cus_clv"]["revenue"]).toFixed(2));
+                $("#churn_sel").text(display_int_value(result["executive_summary"]["churn_customers_selected"]));
+                $("#churn_pre").text(display_int_value(result["executive_summary"]["churn_customers_prev"]));
+                $("#churn_cha").text(display_int_value(result["executive_summary"]["churn_customers_changes"]));
+
+                $("#acl_sel").text(display_float_value(result["executive_summary"]["aclv_customers_selected"]));
+                $("#acl_pre").text(display_float_value(result["executive_summary"]["aclv_customers_prev"]));
+                $("#acl_cha").text(display_float_value(result["executive_summary"]["aclv_customers_changes"]));
+            }
+            else {
+                $("#cus_sel").text("-");
+                $("#cus_pre").text("-");
+                $("#cus_cha").text("-");
+
+                $("#ord_sel").text("-");
+                $("#ord_pre").text("-");
+                $("#ord_cha").text("-");
+
+                $("#rev_sel").text("-");
+                $("#rev_pre").text("-");
+                $("#rev_cha").text("-");
+
+                $("#aov_sel").text("-");
+                $("#aov_pre").text("-");
+                $("#aov_cha").text("-");
+
+                $("#newcus_sel").text("-");
+                $("#newcus_pre").text("-");
+                $("#newcus_cha").text("-");
+
+                $("#rep_sel").text("-");
+                $("#rep_pre").text("-");
+                $("#rep_cha").text("-");
+
+                $("#churn_sel").text("-");
+                $("#churn_pre").text("-");
+                $("#churn_cha").text("-");
+
+                $("#acl_sel").text("-");
+                $("#acl_pre").text("-");
+                $("#acl_cha").text("-");
+                $("#msg_alert").html("<div class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\" ><strong>Information!</strong> Record Not Found!\n" +
+                    "                                    <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"\n" +
+                    "                                        aria-label=\"Close\"></button></div>");
+            }
+        }
+
+        function fill_segment_table_data(result) {
+            $("#loy_users").text(display_int_value(result["loyal_cus_clv"]["users"]));
+            $("#loy_freq").text(display_float_value(result["loyal_cus_clv"]["frequency"]));
+            $("#loy_aov").text(display_float_value(result["loyal_cus_clv"]["aov"]));
+            $("#loy_clv").text(display_float_value(result["loyal_cus_clv"]["clv"]));
+            $("#loy_rev").text(display_float_value(result["loyal_cus_clv"]["revenue"]));
+
+            $("#rep_users").text(display_int_value(result["repeat_cus_clv"]["users"]));
+            $("#rep_freq").text(display_float_value(result["repeat_cus_clv"]["frequency"]));
+            $("#rep_aov").text(display_float_value(result["repeat_cus_clv"]["aov"]));
+            $("#rep_clv").text(display_float_value(result["repeat_cus_clv"]["clv"]));
+            $("#rep_rev").text(display_float_value(result["repeat_cus_clv"]["revenue"]));
+
+            $("#cus_users").text(display_int_value(result["all_cus_clv"]["users"]));
+            $("#cus_freq").text(display_float_value(result["all_cus_clv"]["frequency"]));
+            $("#cus_aov").text(display_float_value(result["all_cus_clv"]["aov"]));
+            $("#cus_clv").text(display_float_value(result["all_cus_clv"]["clv"]));
+            $("#cus_rev").text(display_float_value(result["all_cus_clv"]["revenue"]));
+
+            $("#top_users").text(display_int_value(result["top_cus_clv"]["users"]));
+            $("#top_freq").text(display_float_value(result["top_cus_clv"]["frequency"]));
+            $("#top_aov").text(display_float_value(result["top_cus_clv"]["aov"]));
+            $("#top_clv").text(display_float_value(result["top_cus_clv"]["clv"]));
+            $("#top_rev").text(display_float_value(result["top_cus_clv"]["revenue"]));
+
+            $("#bottom_users").text(display_int_value(result["low_cus_clv"]["users"]));
+            $("#bottom_freq").text(display_float_value(result["low_cus_clv"]["frequency"]));
+            $("#bottom_aov").text(display_float_value(result["low_cus_clv"]["aov"]));
+            $("#bottom_clv").text(display_float_value(result["low_cus_clv"]["clv"]));
+            $("#bottom_rev").text(display_float_value(result["low_cus_clv"]["revenue"]));
+
+            $("#risk_users").text(display_int_value(result["risk_cus_clv"]["users"]));
+            $("#risk_freq").text(display_float_value(result["risk_cus_clv"]["frequency"]));
+            $("#risk_aov").text(display_float_value(result["risk_cus_clv"]["aov"]));
+            $("#risk_clv").text(display_float_value(result["risk_cus_clv"]["clv"]));
+            $("#risk_rev").text(display_float_value(result["risk_cus_clv"]["revenue"]));
+
+            $("#churn_users").text(display_int_value(result["churn_cus_clv"]["users"]));
+            $("#churn_freq").text(display_float_value(result["churn_cus_clv"]["frequency"]));
+            $("#churn_aov").text(display_float_value(result["churn_cus_clv"]["aov"]));
+            $("#churn_clv").text(display_float_value(result["churn_cus_clv"]["clv"]));
+            $("#churn_rev").text(display_float_value(result["churn_cus_clv"]["revenue"]));
+        }
+
+        function display_float_value(value) {
+            var result;
+            if (value != "" && value != "-") {
+                result = parseFloat("" + value).toFixed(2);
+
+            }
+            else
+                result = value;
+            return result;
+
+        }
+
+        function display_int_value(value) {
+            var result;
+
+            if (value != "" && value != "-") {
+                result = parseInt("" + value);
+            }
+            else
+                result = value;
+            return result;
+
+        }
+
+        function display_map(map_data) {
+
+            var bubble_map = new Datamap({
+                element: document.getElementById('uk'),
+                scope: 'GBR_adm2',
+                geographyConfig: {
+                    popupOnHover: false,
+                    highlightOnHover: false,
+                    borderColor: '#444',
+                    borderWidth: 0.5,
+                    dataUrl: 'https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-kingdom/uk-counties.json'
+                    //dataJson: topoJsonData
+                },
+                fills: {
+                    'MAJOR': '#306596',
+                    'MEDIUM': '#0fa0fa',
+                    'MINOR': '#bada55',
+                    defaultFill: '#dddddd'
+                },
+                setProjection: function (element) {
+                    var projection = d3.geo.mercator()
+                        .center([-5.961803, 55.780919]) // always in [East Latitude, North Longitude]
+                        //                    .center([-5.961803, 55.780919]) // always in [East Latitude, North Longitude]
+                        .scale(1000);
+                    var path = d3.geo.path().projection(projection);
+                    return { path: path, projection: projection };
+                }
+            });
+
+
+            let bubbles = [
+                {
+                    latitude: 51.471,
+                    longitude: -2.244,
+                    fillKey: "MAJOR",
+                    radius: 10.3,
+                    state: "Brasserie Blanc Bath",
+                    averageCLV: 103.8206489863,
+                    loyalCustomerPercentage: 1.4,
+                    averageLoyalCLV: 293.6058869476,
+                    numberOfNewCustomer: 3799,
+                    numberOfRepeatCustomer: 214,
+                    revenueFromRepeatCustomer: 18838.3017857143
+                },
+                {
+                    latitude: 51.606,
+                    longitude: -0.623,
+                    fillKey: "MAJOR",
+                    radius: 16.1,
+                    state: "Brasserie Blanc Beaconsfield",
+                    averageCLV: 161.4629086277,
+                    loyalCustomerPercentage: 8.9,
+                    averageLoyalCLV: 492.8855093322,
+                    numberOfNewCustomer: 19950,
+                    numberOfRepeatCustomer: 5455,
+                    revenueFromRepeatCustomer: 567118.6513950232
+                }, {
+                    latitude: 50.715,
+                    longitude: -1.882,
+                    fillKey: "MAJOR",
+                    radius: 12.9,
+                    state: "Brasserie Blanc Bournemouth",
+                    averageCLV: 129.7810401306,
+                    loyalCustomerPercentage: 4.5,
+                    averageLoyalCLV: 492.4317605721,
+                    numberOfNewCustomer: 14599,
+                    numberOfRepeatCustomer: 2080,
+                    revenueFromRepeatCustomer: 218391.9788722885
+                }, {
+                    latitude: 51.515,
+                    longitude: -0.111,
+                    fillKey: "MAJOR",
+                    radius: 16.8,
+                    state: "Brasserie Blanc Chancery Lane",
+                    averageCLV: 168.0582380198,
+                    loyalCustomerPercentage: 2.9,
+                    averageLoyalCLV: 454.7517361531,
+                    numberOfNewCustomer: 7747,
+                    numberOfRepeatCustomer: 752,
+                    revenueFromRepeatCustomer: 85944.1652494888
+                },
+                {
+                    latitude: 51.897,
+                    longitude: -2.08,
+                    fillKey: "MAJOR",
+                    radius: 16.1,
+                    state: "Brasserie Blanc Cheltenham",
+                    averageCLV: 161.574320436,
+                    loyalCustomerPercentage: 6.9,
+                    averageLoyalCLV: 531.9651735054,
+                    numberOfNewCustomer: 17737,
+                    numberOfRepeatCustomer: 3634,
+                    revenueFromRepeatCustomer: 412922.2442942071
+                }, {
+                    latitude: 50.837,
+                    longitude: -0.773,
+                    fillKey: "MAJOR",
+                    radius: 14.9,
+                    state: "Brasserie Blanc Chichester",
+                    averageCLV: 149.6256622623,
+                    loyalCustomerPercentage: 8.3,
+                    averageLoyalCLV: 500.3795133438,
+                    numberOfNewCustomer: 11780,
+                    numberOfRepeatCustomer: 2615,
+                    revenueFromRepeatCustomer: 250062.3637639136
+                },
+                {
+                    latitude: 53.364,
+                    longitude: -2.297,
+                    fillKey: "MAJOR",
+                    radius: 10.9,
+                    state: "Brasserie Blanc Hale Barns",
+                    averageCLV: 109.0286658465,
+                    loyalCustomerPercentage: 1.7,
+                    averageLoyalCLV: 384.1930136535,
+                    numberOfNewCustomer: 3187,
+                    numberOfRepeatCustomer: 204,
+                    revenueFromRepeatCustomer: 19704.5595382306
+                },
+                {
+                    latitude: 53.305,
+                    longitude: -2.373,
+                    fillKey: "MAJOR",
+                    radius: 11.9,
+                    state: "Brasserie Blanc Knutsford",
+                    averageCLV: 119.8092815913,
+                    loyalCustomerPercentage: 2.2,
+                    averageLoyalCLV: 367.3702522087,
+                    numberOfNewCustomer: 2373,
+                    numberOfRepeatCustomer: 251,
+                    revenueFromRepeatCustomer: 24366.5191507937
+                },
+                {
+                    latitude: 53.793,
+                    longitude: -1.544,
+                    fillKey: "MAJOR",
+                    radius: 17.4,
+                    state: "Brasserie Blanc Leeds",
+                    averageCLV: 174.2581099538,
+                    loyalCustomerPercentage: 6.3,
+                    averageLoyalCLV: 561.718579833,
+                    numberOfNewCustomer: 11193,
+                    numberOfRepeatCustomer: 2293,
+                    revenueFromRepeatCustomer: 276408.3742539464
+                },
+                {
+                    latitude: 52.037,
+                    longitude: -0.762,
+                    fillKey: "MAJOR",
+                    radius: 16.9,
+                    state: "Brasserie Blanc Milton Keynes",
+                    averageCLV: 169.8258651944,
+                    loyalCustomerPercentage: 7.3,
+                    averageLoyalCLV: 557.5684564083,
+                    numberOfNewCustomer: 10601,
+                    numberOfRepeatCustomer: 2213,
+                    revenueFromRepeatCustomer: 244684.0662571595
+                },
+                {
+                    latitude: 51.761,
+                    longitude: -1.267,
+                    fillKey: "MAJOR",
+                    radius: 14.7,
+                    state: "Brasserie Blanc Oxford",
+                    averageCLV: 147.0490165991,
+                    loyalCustomerPercentage: 5.7,
+                    averageLoyalCLV: 493.16597343,
+                    numberOfNewCustomer: 14829,
+                    numberOfRepeatCustomer: 2492,
+                    revenueFromRepeatCustomer: 254651.0307673252
+                },
+                {
+                    latitude: 50.796,
+                    longitude: -1.103,
+                    fillKey: "MAJOR",
+                    radius: 15,
+                    state: "Brasserie Blanc Portsmouth",
+                    averageCLV: 150.9933095079,
+                    loyalCustomerPercentage: 5.7,
+                    averageLoyalCLV: 539.6193664167,
+                    numberOfNewCustomer: 11751,
+                    numberOfRepeatCustomer: 2008,
+                    revenueFromRepeatCustomer: 218991.9674908291
+                },
+                {
+                    latitude: 51.506,
+                    longitude: -0.114,
+                    fillKey: "MAJOR",
+                    radius: 14.2,
+                    state: "Brasserie Blanc Southbank",
+                    averageCLV: 142.8088382391,
+                    loyalCustomerPercentage: 3.3,
+                    averageLoyalCLV: 446.5799095031,
+                    numberOfNewCustomer: 19773,
+                    numberOfRepeatCustomer: 2144,
+                    revenueFromRepeatCustomer: 225476.4713801958
+                },
+                {
+                    latitude: 51.514,
+                    longitude: -0.086,
+                    fillKey: "MAJOR",
+                    radius: 16.4,
+                    state: "Brasserie Blanc Threadneedle Street",
+                    averageCLV: 164.1310464348,
+                    loyalCustomerPercentage: 2.7,
+                    averageLoyalCLV: 443.3878546318,
+                    numberOfNewCustomer: 9077,
+                    numberOfRepeatCustomer: 978,
+                    revenueFromRepeatCustomer: 109083.4575950562
+                },
+                {
+                    latitude: 51.512,
+                    longitude: -0.071,
+                    fillKey: "MAJOR",
+                    radius: 15.3,
+                    state: "Brasserie Blanc Tower of London",
+                    averageCLV: 153.5648650061,
+                    loyalCustomerPercentage: 0.5,
+                    averageLoyalCLV: 513.9913163763,
+                    numberOfNewCustomer: 2983,
+                    numberOfRepeatCustomer: 132,
+                    revenueFromRepeatCustomer: 20111.8658333333
+                },
+                {
+                    latitude: 51.065,
+                    longitude: -1.315,
+                    fillKey: "MAJOR",
+                    radius: 14.8,
+                    state: "Brasserie Blanc Winchester",
+                    averageCLV: 148.6051824018,
+                    loyalCustomerPercentage: 5.3,
+                    averageLoyalCLV: 487.301485731,
+                    numberOfNewCustomer: 15003,
+                    numberOfRepeatCustomer: 2501,
+                    revenueFromRepeatCustomer: 266006.140169428
+                },
+                {
+                    latitude: 51.488,
+                    longitude: -0.226,
+                    fillKey: "MAJOR",
+                    radius: 16.4,
+                    state: "Fulham Reach",
+                    averageCLV: 164.729488126,
+                    loyalCustomerPercentage: 5.1,
+                    averageLoyalCLV: 559.4775652867,
+                    numberOfNewCustomer: 7168,
+                    numberOfRepeatCustomer: 1149,
+                    revenueFromRepeatCustomer: 139296.0574129191
+                },
+                {
+                    latitude: 51.237,
+                    longitude: -0.206,
+                    fillKey: "MAJOR",
+                    radius: 15.9,
+                    state: "Reigate",
+                    averageCLV: 159.4333708048,
+                    loyalCustomerPercentage: 8.2,
+                    averageLoyalCLV: 493.9643376789,
+                    numberOfNewCustomer: 10235,
+                    numberOfRepeatCustomer: 2532,
+                    revenueFromRepeatCustomer: 268076.7322610299
+                },
+                {
+                    latitude: 51.244,
+                    longitude: -0.005,
+                    fillKey: "MAJOR",
+                    radius: 15.5,
+                    state: "The Barley Mow",
+                    averageCLV: 155.9241790531,
+                    loyalCustomerPercentage: 9,
+                    averageLoyalCLV: 528.7829748803,
+                    numberOfNewCustomer: 9169,
+                    numberOfRepeatCustomer: 2307,
+                    revenueFromRepeatCustomer: 235017.3400581832
+                },
+                {
+                    latitude: 51.747,
+                    longitude: -0.977,
+                    fillKey: "MAJOR",
+                    radius: 17.7,
+                    state: "The Black Horse - Thame",
+                    averageCLV: 177.8144111618,
+                    loyalCustomerPercentage: 10.6,
+                    averageLoyalCLV: 535.9106101842,
+                    numberOfNewCustomer: 15387,
+                    numberOfRepeatCustomer: 4549,
+                    revenueFromRepeatCustomer: 499212.8739177917
+                },
+                {
+                    latitude: 51.97,
+                    longitude: -0.855,
+                    fillKey: "MAJOR",
+                    radius: 16.9,
+                    state: "The Boot",
+                    averageCLV: 169.9054980849,
+                    loyalCustomerPercentage: 11.3,
+                    averageLoyalCLV: 517.1817135269,
+                    numberOfNewCustomer: 12737,
+                    numberOfRepeatCustomer: 4171,
+                    revenueFromRepeatCustomer: 425112.2509207239
+                },
+                {
+                    latitude: 52.131,
+                    longitude: 0.246,
+                    fillKey: "MAJOR",
+                    radius: 18.0,
+                    state: "The British Queen",
+                    averageCLV: 180.2180242046,
+                    loyalCustomerPercentage: 7.6,
+                    averageLoyalCLV: 568.3569254011,
+                    numberOfNewCustomer: 4449,
+                    numberOfRepeatCustomer: 1076,
+                    revenueFromRepeatCustomer: 125838.306067513
+                },
+                {
+                    latitude: 51.03,
+                    longitude: -0.958,
+                    fillKey: "MAJOR",
+                    radius: 14.0,
+                    state: "The Cricketers",
+                    averageCLV: 140.4249406306,
+                    loyalCustomerPercentage: 7.6,
+                    averageLoyalCLV: 454.645760936,
+                    numberOfNewCustomer: 13323,
+                    numberOfRepeatCustomer: 3084,
+                    revenueFromRepeatCustomer: 296301.2528063028
+                },
+                {
+                    latitude: 51.778,
+                    longitude: 0.382,
+                    fillKey: "MAJOR",
+                    radius: 17.6,
+                    state: "The Hare",
+                    averageCLV: 176.9136373072,
+                    loyalCustomerPercentage: 11.1,
+                    averageLoyalCLV: 521.0249153503,
+                    numberOfNewCustomer: 8780,
+                    numberOfRepeatCustomer: 2977,
+                    revenueFromRepeatCustomer: 312597.0877212432
+                },
+                {
+                    latitude: 52.238,
+                    longitude: -0.156,
+                    fillKey: "MAJOR",
+                    radius: 16.3,
+                    state: "The Highwayman",
+                    averageCLV: 163.2377065389,
+                    loyalCustomerPercentage: 8.8,
+                    averageLoyalCLV: 518.9623973134,
+                    numberOfNewCustomer: 9400,
+                    numberOfRepeatCustomer: 2581,
+                    revenueFromRepeatCustomer: 273558.9591048814
+                },
+                {
+                    latitude: 51.558,
+                    longitude: 0.274,
+                    fillKey: "MAJOR",
+                    radius: 19.1,
+                    state: "The Jobber's Rest",
+                    averageCLV: 191.8113921078,
+                    loyalCustomerPercentage: 13.7,
+                    averageLoyalCLV: 570.3118335427,
+                    numberOfNewCustomer: 10806,
+                    numberOfRepeatCustomer: 4158,
+                    revenueFromRepeatCustomer: 441825.8619952538
+                },
+                {
+                    latitude: 51.655,
+                    longitude: -0.107,
+                    fillKey: "MAJOR",
+                    radius: 18.1,
+                    state: "The Jolly Farmer",
+                    averageCLV: 181.6103169303,
+                    loyalCustomerPercentage: 12.5,
+                    averageLoyalCLV: 532.961324072,
+                    numberOfNewCustomer: 5816,
+                    numberOfRepeatCustomer: 2080,
+                    revenueFromRepeatCustomer: 215648.8655953375
+                },
+                {
+                    latitude: 51.807,
+                    longitude: -0.492,
+                    fillKey: "MAJOR",
+                    radius: 16.1,
+                    state: "The King's Arms",
+                    averageCLV: 161.6258927515,
+                    loyalCustomerPercentage: 9.7,
+                    averageLoyalCLV: 498.4368814273,
+                    numberOfNewCustomer: 8658,
+                    numberOfRepeatCustomer: 2538,
+                    revenueFromRepeatCustomer: 259201.022860938
+                },
+                {
+                    latitude: 51.47,
+                    longitude: -0.521,
+                    fillKey: "MAJOR",
+                    radius: 18.7,
+                    state: "The Kings Head",
+                    averageCLV: 187.6627585819,
+                    loyalCustomerPercentage: 11.4,
+                    averageLoyalCLV: 554.1282592004,
+                    numberOfNewCustomer: 11642,
+                    numberOfRepeatCustomer: 3920,
+                    revenueFromRepeatCustomer: 439083.5442009325
+                },
+                {
+                    latitude: 51.278,
+                    longitude: -0.511,
+                    fillKey: "MAJOR",
+                    radius: 15.8,
+                    state: "The March Hare",
+                    averageCLV: 158.6843060387,
+                    loyalCustomerPercentage: 7.4,
+                    averageLoyalCLV: 484.8912866803,
+                    numberOfNewCustomer: 17338,
+                    numberOfRepeatCustomer: 4162,
+                    revenueFromRepeatCustomer: 453726.1788376899
+                },
+                {
+                    latitude: 51.67,
+                    longitude: -0.497,
+                    fillKey: "MAJOR",
+                    radius: 15.4,
+                    state: "The Oaks",
+                    averageCLV: 154.0882334028,
+                    loyalCustomerPercentage: 9.1,
+                    averageLoyalCLV: 525.0498652461,
+                    numberOfNewCustomer: 14740,
+                    numberOfRepeatCustomer: 3721,
+                    revenueFromRepeatCustomer: 375815.6581382698
+                },
+                {
+                    latitude: 51.429,
+                    longitude: -0.935,
+                    fillKey: "MAJOR",
+                    radius: 13.7,
+                    state: "The Oakwood",
+                    averageCLV: 137.7764401102,
+                    loyalCustomerPercentage: 3,
+                    averageLoyalCLV: 393.0892136484,
+                    numberOfNewCustomer: 2062,
+                    numberOfRepeatCustomer: 230,
+                    revenueFromRepeatCustomer: 28099.9873102453
+                },
+                {
+                    latitude: 51.385,
+                    longitude: -0.56,
+                    fillKey: "MAJOR",
+                    radius: 16.9,
+                    state: "The Queens Head",
+                    averageCLV: 169.1449902345,
+                    loyalCustomerPercentage: 9,
+                    averageLoyalCLV: 543.4618230344,
+                    numberOfNewCustomer: 10735,
+                    numberOfRepeatCustomer: 2863,
+                    revenueFromRepeatCustomer: 318708.7250417958
+                },
+                {
+                    latitude: 51.063,
+                    longitude: -0.326,
+                    fillKey: "MAJOR",
+                    radius: 15.9,
+                    state: "The Red Deer",
+                    averageCLV: 159.7972219423,
+                    loyalCustomerPercentage: 7.7,
+                    averageLoyalCLV: 476.7726360475,
+                    numberOfNewCustomer: 10151,
+                    numberOfRepeatCustomer: 2575,
+                    revenueFromRepeatCustomer: 274943.3153444236
+                },
+                {
+                    latitude: 51.372,
+                    longitude: -0.468,
+                    fillKey: "MAJOR",
+                    radius: 16.4,
+                    state: "The Sun Inn",
+                    averageCLV: 164.5675241293,
+                    loyalCustomerPercentage: 11.1,
+                    averageLoyalCLV: 525.8164882575,
+                    numberOfNewCustomer: 11303,
+                    numberOfRepeatCustomer: 3624,
+                    revenueFromRepeatCustomer: 365301.4708195629
+                }, {
+                    latitude: 51.507,
+                    longitude: -0.945,
+                    fillKey: "MAJOR",
+                    radius: 17.6,
+                    state: "The Victoria",
+                    averageCLV: 176.0501315359,
+                    loyalCustomerPercentage: 4.5,
+                    averageLoyalCLV: 610.831286979,
+                    numberOfNewCustomer: 1550,
+                    numberOfRepeatCustomer: 214,
+                    revenueFromRepeatCustomer: 30647.7875634921
+                },
+                {
+                    latitude: 51.546,
+                    longitude: -0.025,
+                    fillKey: "MAJOR",
+                    radius: 17.6,
+                    state: "The White Bear",
+                    averageCLV: 176.1977209691,
+                    loyalCustomerPercentage: 13.1,
+                    averageLoyalCLV: 491.7146728667,
+                    numberOfNewCustomer: 8848,
+                    numberOfRepeatCustomer: 3342,
+                    revenueFromRepeatCustomer: 329375.7270054448
+                }
+            ]
+            // alert(bubbles[0]["latitude"])  ;
+            // alert(aaa[0])  ;
+            // // ISO ID code for city or <state></state>
+            setTimeout(() => { // only start drawing bubbles on the map when map has rendered completely.
+                bubble_map.bubbles(bubbles, {
+                    popupTemplate: function (geo, data) {
+
+                        return `<div class="hoverinfo">Restaurant: ${data.state}<br/> Average CLV: ${data.averageCLV}<br/> Average Loyal CLV: ${data.averageLoyalCLV}<br/> Percentage of Loyal Customer : ${data.loyalCustomerPercentage}%<br/> Number of New Customer: ${data.numberOfNewCustomer}<br/> Number of Repeat Customer: ${data.numberOfRepeatCustomer}<br/> Revenue From Repeat Customer: ${data.revenueFromRepeatCustomer}<br/> </div>`;
+                    }
+                });
+            }, 1000);
         }
 
     </script>
@@ -626,7 +1230,7 @@
 
             </div>
             <form class="d-flex">
-                <i class="fa fa-power-off text-danger" aria-hidden="true"></i>
+               <a href="login.html"><i class="fa fa-power-off text-danger" aria-hidden="true"></i></a> 
             </form>
         </div>
     </nav>
@@ -639,10 +1243,13 @@
                             <div class="card h-100">
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-12">
-                                            <h6 class="card-title text-primary">Customer Segmentations for <label class="text-secondary">Brasserie Blanc Bath</label>, 01-08-2019 to 28-02-2022</h6>
+                                        <div class="col-md-8">
+                                            <h6 class="card-title text-primary">Customer Segmentations <label
+                                                    id="restaurant_name" class="text-secondary"></label> <label
+                                                    id="cs_selectionDate">( 01-08-2019 to
+                                                    28-02-2022 )</label> </h6>
                                         </div>
-                                        <div class="col-md-4 offset-md-4">
+                                        <div class="col-md-4">
                                             <select id="segment_location_list"
                                                 onchange="location_based_customer_segmentation();" data-max-options="5"
                                                 data-live-search="true"></select>
@@ -663,8 +1270,8 @@
                                                 <td class="text-primary">Loyals<br /> <label
                                                         class="text-secondary">Customer
                                                         with 3+ Purchase</label></td>
-                                                <td id="loy_users">90,000</td>
-                                                <td id="loy_freq">3.1</td>
+                                                <td id="loy_users"></td>
+                                                <td id="loy_freq"></td>
                                                 <td id="loy_aov"></td>
                                                 <td id="loy_clv"></td>
                                                 <td id="loy_rev"></td>
@@ -673,8 +1280,8 @@
                                                 <td class="text-primary">Repeats<br /><label
                                                         class="text-secondary">Customer
                                                         with Purchases</label></td>
-                                                <td id="rep_users">90,000</td>
-                                                <td id="rep_freq">3.1</td>
+                                                <td id="rep_users"></td>
+                                                <td id="rep_freq"></td>
                                                 <td id="rep_aov"></td>
                                                 <td id="rep_clv"></td>
                                                 <td id="rep_rev"></td>
@@ -683,8 +1290,8 @@
                                                 <td class="text-primary">Customers<br /><label
                                                         class="text-secondary">Customer
                                                         with atleast 1 Purchase</label></td>
-                                                <td id="cus_users">4524</td>
-                                                <td id="cus_freq">4.3</td>
+                                                <td id="cus_users"></td>
+                                                <td id="cus_freq"></td>
                                                 <td id="cus_aov"></td>
                                                 <td id="cus_clv"></td>
                                                 <td id="cus_rev"></td>
@@ -693,8 +1300,8 @@
                                                 <td class="text-primary">Top Spenders<br /><label
                                                         class="text-secondary">Customers in the top quartile of
                                                         spending</label></td>
-                                                <td id="top_users">90,000</td>
-                                                <td id="top_freq">3.1</td>
+                                                <td id="top_users"></td>
+                                                <td id="top_freq"></td>
                                                 <td id="top_aov"></td>
                                                 <td id="top_clv"></td>
                                                 <td id="top_rev"></td>
@@ -703,8 +1310,8 @@
                                                 <td class="text-primary">Bottom Spenders<br /> <label
                                                         class="text-secondary">Customers in the bottom quartile of
                                                         spending</label></td>
-                                                <td id="bottom_users">90,000</td>
-                                                <td id="bottom_freq">3.1</td>
+                                                <td id="bottom_users"></td>
+                                                <td id="bottom_freq"></td>
                                                 <td id="bottom_aov"></td>
                                                 <td id="bottom_clv"></td>
                                                 <td id="bottom_rev"></td>
@@ -713,8 +1320,8 @@
                                                 <td class="text-primary">At Risk Customers<br /><label
                                                         class="text-secondary">Customer at the risk of churning</label>
                                                 </td>
-                                                <td id="risk_users">90,000</td>
-                                                <td id="risk_freq">3.1</td>
+                                                <td id="risk_users"></td>
+                                                <td id="risk_freq"></td>
                                                 <td id="risk_aov"></td>
                                                 <td id="risk_clv"></td>
                                                 <td id="risk_rev"></td>
@@ -725,8 +1332,8 @@
                                                         made a Purchase in 2x
                                                         the average number of days
                                                         between orders</label></td>
-                                                <td id="churn_users">90,000</td>
-                                                <td id="churn_freq">3.1</td>
+                                                <td id="churn_users"></td>
+                                                <td id="churn_freq"></td>
                                                 <td id="churn_aov"></td>
                                                 <td id="churn_clv"></td>
                                                 <td id="churn_rev"></td>
@@ -743,8 +1350,11 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-8">
-                                            <h6 class="card-title text-primary">Customer Life Time Prediction Vs Actual OverTime <label class="text-secondary">01-05-2021 to 30-05-2022</label></h6>
-                                                
+                                            <h6 class="card-title text-primary">Customer Life Time Prediction Vs Actual
+                                                OverTime ( 01-05-2021 to
+                                                30-05-2022 ) <label class="text-secondary" id="ca_fromToDate"></label>
+                                            </h6>
+
                                         </div>
                                         <div class="col-md-2 offset-md-2">
                                             <button id="test" class="btn btn-success btn-sm"> Reset </button>
@@ -763,7 +1373,7 @@
                                     <h6 class="card-title text-primary">Location Based Analysis</h6>
                                     <hr>
 
-                                    <canvas id="canvas"></canvas>
+                                    <div id="uk" style="height: 350px; width: 600px; position: relative;"></div>
                                 </div>
 
                             </div>
@@ -811,43 +1421,116 @@
         </div>
         <div class="tab-pane fade" id="nav-exeutive" role="tabpanel" aria-labelledby="nav-profile-tab">
             <div class="container">
+
                 <div class="row mt-3 mb-3">
+
                     <div class="col-md-12 mb-3">
                         <div class="card rounded-0 h-100">
                             <div class="card-body w-100">
-                                <h6 class="card-title text-primary text-center">Executive Summary for <label class="text-secondary">Brasserie Blanc Bath</label>, Year 2021</h6>
+
+                                <h6 class="card-title text-primary text-center">Executive Summary<label
+                                        class="text-secondary" id="executive_summaryLocation"></label> <label
+                                        id="executive_summaryYear"></label></h6>
                                 <hr>
-                                <div id="fa_loading" style="text-align: center;display: none;">
+                                <div id="msg_alert">
+
+                                </div>
+                                <!-- <div id="fa_loading" style="text-align: center;display: none;">
                                     <i class="fa fa-spinner fa-spin" style="font-size:24px;color:blue;"></i>
+                                </div> -->
+                                <div id="fa_loading" style="display:none ;">
+                                    <div class="w-100 d-flex justify-content-center align-items-center">
+                                        <div class="spinner spinner-border text-primary"></div>
+                                    </div>
+                                </div>
+                                <div>
+
                                 </div>
                                 <div class="card-group">
+
+
                                     <div class="card">
                                         <div class="card-body">
-                                            <select class="form-select" aria-label="Default select example">
+                                            <select class="form-select" id="selectpicker"
+                                                aria-label="Default select example">
                                                 <option selected="selected" value="green">Standard</option>
                                                 <option value="blue">Customised</option>
                                             </select>
                                             <br>
                                             <div class="green box">
-                                                <input type="month" class="form-control">
+                                                <div class="row">
+                                                    <div class="col-lg-6">
+                                                        <select class="selectpicker2 border rounded" id="year_list"
+                                                            data-live-search="true" data-width="100%">
+                                                            <option value="">Year</option>
+                                                            <option value="2015">2015</option>
+                                                            <option value="2016">2016</option>
+                                                            <option value="2017">2017</option>
+                                                            <option value="2018">2018</option>
+                                                            <option value="2019">2019</option>
+                                                            <option value="2020">2020</option>
+                                                            <option value="2021" selected>2021</option>
+                                                            <option value="2022">2022</option>
+                                                            <option value="2023">2023</option>
+                                                            <option value="2024">2024</option>
+                                                            <option value="2025">2025</option>
+                                                            <option value="2026">2026</option>
+                                                            <option value="2027">2027</option>
+                                                            <option value="2028">2028</option>
+                                                            <option value="2029">2029</option>
+                                                            <option value="2030">2030</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <select class="selectpicker1 border rounded" id="month_list"
+                                                            data-live-search="true" data-width="100%">
+                                                            <option value="">Month</option>
+                                                            <option value="1">January</option>
+                                                            <option value="2">February</option>
+                                                            <option value="3">March</option>
+                                                            <option value="4">April</option>
+                                                            <option value="5">May</option>
+                                                            <option value="6">June</option>
+                                                            <option value="7">July</option>
+                                                            <option value="8">August</option>
+                                                            <option value="9">September</option>
+                                                            <option value="10">October</option>
+                                                            <option value="11">November</option>
+                                                            <option value="12">December</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                             <div class="blue box">
                                                 <div class="input-group mb-3">
                                                     <span class="input-group-text">From</span>
-                                                    <input type="date" class="form-control">
+                                                    <input type="date" id="from_date" class="form-control">
                                                     <span class="input-group-text">To</span>
-                                                    <input type="date" class="form-control">
+                                                    <input type="date" id="to_date" class="form-control">
                                                 </div>
                                             </div>
 
-                                        </div> 
+                                        </div>
                                     </div>
+
+
+
+
+
                                     <div class="card">
                                         <div class="card-body">
-                                            <h5 className="text-secondary">Location <span><i class="fa fa-filter"
-                                                        aria-hidden="true"></i></span></h5> <br>
-                                            <select id="excutive_summary_list" class="border rounded" data-live-search="true" onchange="location_based_excutive_summary();"    data-width="100%">
-                                                
+                                            <div class="row">
+                                                <div class="col-lg-10">
+                                                    <h5 className="text-secondary">Location <span><i
+                                                                class="fa fa-filter" aria-hidden="true"></i></span></h5>
+                                                </div>
+                                                <div class="col-lg-2"><button class="btn btn-success"
+                                                        onclick="location_based_excutive_summary();">GO</button></div>
+                                            </div>
+                                            <br>
+                                            <select id="excutive_summary_list" class="border rounded"
+                                                data-live-search="true" data-width="100%">
                                             </select>
                                         </div>
                                     </div>
@@ -864,51 +1547,51 @@
                                         </tr>
                                         <tr>
                                             <td class="text-primary">Customers</td>
-                                            <td id="cus_sel">1,561</td>
-                                            <td id="cus_pre">1,712</td>
-                                            <td id="cus_cha">-9%</td>
+                                            <td id="cus_sel"></td>
+                                            <td id="cus_pre"></td>
+                                            <td id="cus_cha"></td>
                                         </tr>
                                         <tr>
                                             <td class="text-primary">Orders</td>
-                                            <td id="ord_sel">1,561</td>
-                                            <td id="ord_pre">1,712</td>
-                                            <td id="ord_cha">-9%</td>
+                                            <td id="ord_sel"></td>
+                                            <td id="ord_pre"></td>
+                                            <td id="ord_cha"></td>
                                         </tr>
                                         <tr>
                                             <td class="text-primary">Revenue</td>
-                                            <td id="rev_sel">1,561</td>
-                                            <td id="rev_pre">1,712</td>
-                                            <td id="rev_cha">-9%</td>
+                                            <td id="rev_sel"></td>
+                                            <td id="rev_pre"></td>
+                                            <td id="rev_cha"></td>
                                         </tr>
                                         <tr>
                                             <td class="text-primary">Average Order Value</td>
-                                            <td id="aov_sel">1,561</td>
-                                            <td id="aov_pre">1,712</td>
-                                            <td id="aov_cha">-9%</td>
+                                            <td id="aov_sel"></td>
+                                            <td id="aov_pre"></td>
+                                            <td id="aov_cha"></td>
                                         </tr>
                                         <tr>
                                             <td class="text-primary">New Customers</td>
-                                            <td id="newcus_sel">1,561</td>
-                                            <td id="newcus_pre">1,712</td>
-                                            <td id="newcus_cha">-9%</td>
+                                            <td id="newcus_sel"></td>
+                                            <td id="newcus_pre"></td>
+                                            <td id="newcus_cha"></td>
                                         </tr>
                                         <tr>
                                             <td class="text-primary">Repeat Customers</td>
-                                            <td id="rep_sel">1,561</td>
-                                            <td id="rep_pre">1,712</td>
-                                            <td id="rep_cha">-9%</td>
+                                            <td id="rep_sel"></td>
+                                            <td id="rep_pre"></td>
+                                            <td id="rep_cha"></td>
                                         </tr>
                                         <tr>
                                             <td class="text-primary">Churned Customers</td>
-                                            <td id="churn_sel">1,561</td>
-                                            <td id="churn_pre">1,712</td>
-                                            <td id="churn_cha">-9%</td>
+                                            <td id="churn_sel"></td>
+                                            <td id="churn_pre"></td>
+                                            <td id="churn_cha"></td>
                                         </tr>
                                         <tr>
                                             <td class="text-primary">Avg Customer Lifetime Value</td>
-                                            <td id="acl_sel">1,561</td>
-                                            <td id="acl_pre">1,712</td>
-                                            <td id="acl_cha">-9%</td>
+                                            <td id="acl_sel"></td>
+                                            <td id="acl_pre"></td>
+                                            <td id="acl_cha"></td>
                                         </tr>
                                     </tbody>
                                 </table>
