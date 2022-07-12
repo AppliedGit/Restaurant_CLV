@@ -26,8 +26,8 @@ TEMPLATE_DIR = os.path.join(BASE_DIR2,'templates')
 SECRET_KEY = 'django-insecure-d9qhqi+ieg^_i9-=6v^1$fs!snv6+si38!i$n!13wbss&rm!30'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"
-#DEBUG = True
+#DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 #ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
