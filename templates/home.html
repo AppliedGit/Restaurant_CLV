@@ -108,6 +108,8 @@
 
         var prediction_graph, age_based_analytics_graph, revenue_graph;
 
+        var avg_clv,number_of_cus,value_of_revenue = [];
+
         $(document).ready(function () {
             const chart_age = document.querySelectorAll(".chart");
             const chart_revenue = document.querySelectorAll(".chartLine");
@@ -160,15 +162,15 @@
                             tooltip: {
                                 callbacks: {
                                     beforeTitle: function (context) {
-                                        return 'Age Group';
+                                        return 'Number of Customer in the age group  :' + number_of_cus[context[0].dataIndex];                    
                                     },
                                     // title:function(context){
                                     //   console.log(context[0].label);
                                     //   return `${context[0].label} Day: ${weekarray[context[0].dataIndex]}`
                                     // },
                                     afterTitle: function (context) {
-                                        return 'Average CLV';
-                                        // return 'Average CLV:' + avg_clv[context[0].dataIndex];
+                                        
+                                         return 'Average CLV:' + avg_clv[context[0].dataIndex];
                                     },
                                     beforeBody: function (context) {
                                         // const newLineArray = [];
@@ -187,7 +189,7 @@
                                     //     return '+++++++++';
                                     // },
                                     afterFooter: function (context) {
-                                        //return 'Value of Revenue: ' + revenue_val[context[0].dataIndex];;
+                                        return 'Value of Revenue: ' + value_of_revenue[context[0].dataIndex];;
                                     },
 
                                 }
@@ -338,17 +340,7 @@
             // To style all selects
             $('.selectpicker').selectpicker();
             $('.selectpicker1').selectpicker();
-            $('.selectpicker2').selectpicker();
-
-
-            // To style all selects
-            // $('.selectpicker').selectpicker();
-            // $('.selectpicker1').selectpicker();
-            // $('.selectpicker2').selectpicker();
-
-
-
-
+            $('.selectpicker2').selectpicker();            
 
         });
 
@@ -361,11 +353,9 @@
 
                     prediction_graph.data.labels = result["prediction_graph"]["day_of_year"];
                     prediction_graph.data.datasets[0]["data"] = result["prediction_graph"]["prediction_val"];
-                    prediction_graph.data.datasets[1]["data"] = result["prediction_graph"]["transaction_val"];
-                    // console.log(prediction_graph.options.plugins.tooltip.callbacks);
-
+                    prediction_graph.data.datasets[1]["data"] = result["prediction_graph"]["transaction_val"];                                                            
                     prediction_graph.update();
-                    // alert(result["analytics_graph"]["age_category"])
+                    
 
                     var analytics_label_arr = result["analytics_graph"]["age_category"];
                     analytics_label_arr[7] = "Unknown";
@@ -373,6 +363,16 @@
                     age_based_analytics_graph.data.datasets[0]["data"] = result["analytics_graph"]["age_category_rev_percentage"];
                     age_based_analytics_graph.data.datasets[1]["data"] = [0, 0, 0, 0, 0, 0, 0, parseFloat(result["analytics_graph_unknown"])];
                     age_based_analytics_graph.update();
+
+                    avg_clv = result["analytics_graph"]["avg_clv"];
+                    number_of_cus = result["analytics_graph"]["no_cus_age_group"];
+                    value_of_revenue = result["analytics_graph"]["val_of_revenue"];
+
+                    avg_clv[7] = 25;
+                    number_of_cus[7] = 25;
+                    value_of_revenue[7] = 25;
+
+
 
 
 
@@ -478,6 +478,8 @@
                     age_based_analytics_graph.data.datasets[1]["data"] = [0, 0, 0, 0, 0, 0, 0, parseFloat(result["analytics_graph_unknown"])];
                     age_based_analytics_graph.update();
 
+                    
+
                 }
             });
         }
@@ -547,39 +549,54 @@
             });
         }
 
+        function calculate_changes_val(sel_val,prev_val)
+        {
+            var changes_val;
+            if (prev_val != "" && prev_val != "-")
+            {
+                changes_val = display_float_value((sel_val - prev_val) / (prev_val) * 100);
+            }
+            else
+            {
+                changes_val = "-";
+            }
+            return changes_val;            
+            
+        }
+
         function fill_executive_summary_data(result) {
             if (Object.keys(result["executive_summary"]).length > 0) {
                 $("#cus_sel").text(display_int_value(result["executive_summary"]["customers_selected"]));
                 $("#cus_pre").text(display_int_value(result["executive_summary"]["customers_prev"]));
-                $("#cus_cha").text(display_int_value(result["executive_summary"]["customers_changes"]));
+                $("#cus_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["customers_selected"]),display_int_value(result["executive_summary"]["customers_prev"])));
 
                 $("#ord_sel").text(display_int_value(result["executive_summary"]["orders_selected"]));
                 $("#ord_pre").text(display_int_value(result["executive_summary"]["orders_prev"]));
-                $("#ord_cha").text(display_int_value(result["executive_summary"]["orders_changes"]));
+                $("#ord_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["orders_selected"]),display_int_value(result["executive_summary"]["orders_prev"])));
 
                 $("#rev_sel").text(display_float_value(result["executive_summary"]["revenue_selected"]));
                 $("#rev_pre").text(display_float_value(result["executive_summary"]["revenue_prev"]));
-                $("#rev_cha").text(display_float_value(result["executive_summary"]["revenue_changes"]));
+                $("#rev_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["revenue_selected"]),display_float_value(result["executive_summary"]["revenue_prev"])));
 
                 $("#aov_sel").text(display_float_value(result["executive_summary"]["aov_selected"]));
                 $("#aov_pre").text(display_float_value(result["executive_summary"]["aov_prev"]));
-                $("#aov_cha").text(display_float_value(result["executive_summary"]["aov_changes"]));
+                $("#aov_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["aov_selected"]),display_float_value(result["executive_summary"]["aov_prev"])));
 
                 $("#newcus_sel").text(display_int_value(result["executive_summary"]["new_customers_selected"]));
                 $("#newcus_pre").text(display_int_value(result["executive_summary"]["new_customers_prev"]));
-                $("#newcus_cha").text(display_int_value(result["executive_summary"]["new_customers_changes"]));
+                $("#newcus_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["new_customers_selected"]),display_int_value(result["executive_summary"]["new_customers_prev"])));
 
                 $("#rep_sel").text(display_int_value(result["executive_summary"]["repeat_customers_selected"]));
                 $("#rep_pre").text(display_int_value(result["executive_summary"]["repeat_customers_prev"]));
-                $("#rep_cha").text(display_int_value(result["executive_summary"]["repeat_customers_changes"]));
+                $("#rep_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["repeat_customers_selected"]),display_int_value(result["executive_summary"]["repeat_customers_prev"])));
 
                 $("#churn_sel").text(display_int_value(result["executive_summary"]["churn_customers_selected"]));
                 $("#churn_pre").text(display_int_value(result["executive_summary"]["churn_customers_prev"]));
-                $("#churn_cha").text(display_int_value(result["executive_summary"]["churn_customers_changes"]));
+                $("#churn_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["churn_customers_selected"]),display_int_value(result["executive_summary"]["churn_customers_prev"])));
 
                 $("#acl_sel").text(display_float_value(result["executive_summary"]["aclv_customers_selected"]));
                 $("#acl_pre").text(display_float_value(result["executive_summary"]["aclv_customers_prev"]));
-                $("#acl_cha").text(display_float_value(result["executive_summary"]["aclv_customers_changes"]));
+                $("#acl_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["aclv_customers_selected"]),display_float_value(result["executive_summary"]["aclv_customers_prev"])));
             }
             else {
                 $("#cus_sel").text("-");
@@ -1196,8 +1213,7 @@
                     revenueFromRepeatCustomer: 329375.7270054448
                 }
             ]
-            // alert(bubbles[0]["latitude"])  ;
-            // alert(aaa[0])  ;
+            
             // // ISO ID code for city or <state></state>
             setTimeout(() => { // only start drawing bubbles on the map when map has rendered completely.
                 bubble_map.bubbles(bubbles, {
