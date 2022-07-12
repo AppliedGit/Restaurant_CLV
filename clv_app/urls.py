@@ -10,6 +10,6 @@ urlpatterns = [
     path('age_based_location_data/',views.age_based_location_data,name="age_based_location_data"),
     path('revenue_based_location_data/',views.revenue_based_location_data,name="revenue_based_location_data"),
     path('location_based_excutive_summary/',views.location_based_excutive_summary,name="location_based_excutive_summary"),
-    path('login/',views.login,name="login"),   
-    path('home/',views.home,name="home"),   
+    #path('',views.login,name="login"),   
+    path('',views.home,name="home"),   
     ]

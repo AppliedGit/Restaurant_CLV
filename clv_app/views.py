@@ -13,6 +13,8 @@ import numpy as np
 from pycaret.regression import *
 import plotly.express as px
 
+
+
 # Create your views here.
 
 directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -51,11 +53,14 @@ def get_time_series_data(request):
         #executive summary filter from date & to date
         act_start = ''#'2022-01-01 00:00:00'
         act_end = ''#'2022-04-30 00:00:00'
-        year = 2020
+        year = 2021
         month = 0
         custom_filter = True
         is_filter = False
-
+        print("*****************************************************************************************")
+        print(act_start)
+        print(act_end)
+        print("*****************************************************************************************")
         prev_act_start = ''#'2021-01-01 00:00:00'
         prev_act_end = ''#'2021-04-30 00:00:00'
         prev_year = 0
@@ -308,6 +313,7 @@ def get_time_series_data(request):
         graph_dic["tot_repeat_transaction"] = json.loads(prediction_cus_clv["Total_Repeat_Transaction"].to_json(orient = 'records'))
         graph_dic["latitude"] = json.loads(prediction_cus_clv["Latitude"].to_json(orient = 'records'))
         graph_dic["longitude"] = json.loads(prediction_cus_clv["Longitude"].to_json(orient = 'records'))
+        graph_dic["map_location"] = json.loads(prediction_cus_clv["Location"].to_json(orient = 'records'))
         
         settings.PREDICTION_GRAPH_DATA = graph_dic
 
@@ -733,34 +739,39 @@ def get_time_series_data(request):
             executive_summary_df_final_prev["AVG_CLV_ALL"] = '-'
 
         executive_summary_df_final.fillna('-', inplace=True)
-        summary_location = "Brasserie Blanc Bath"
+        summary_location = "The Sun Inn"
         executive_summary_dict = {}
+        print("*********************************************************************************")
+        print(executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size)
+        print("*********************************************************************************")
 
-        executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]
-        executive_summary_dict["customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS_Changes"].tolist()[0] 
-        executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]                 
+        if executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size != 0:
 
-        executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]  
-        executive_summary_dict["orders_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS_Changes"].tolist()[0]
-        executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
-        executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-        executive_summary_dict["revenue_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL_Changes"].tolist()[0] 
-        executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-        executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]  
-        executive_summary_dict["aov_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL_Changes"].tolist()[0]  
-        executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
-        executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]  
-        executive_summary_dict["new_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS_Changes"].tolist()[0] 
-        executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
-        executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]
-        executive_summary_dict["repeat_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS_Changes"].tolist()[0]  
-        executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
-        executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]  
-        executive_summary_dict["churn_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS_Changes"].tolist()[0]
-        executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
-        executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
-        executive_summary_dict["aclv_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL_Changes"].tolist()[0] 
-        executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
+            executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]
+            executive_summary_dict["customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS_Changes"].tolist()[0] 
+            executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]                 
+
+            executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]  
+            executive_summary_dict["orders_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS_Changes"].tolist()[0]
+            executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
+            executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["revenue_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL_Changes"].tolist()[0] 
+            executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]  
+            executive_summary_dict["aov_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL_Changes"].tolist()[0]  
+            executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]  
+            executive_summary_dict["new_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS_Changes"].tolist()[0] 
+            executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
+            executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]
+            executive_summary_dict["repeat_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS_Changes"].tolist()[0]  
+            executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
+            executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]  
+            executive_summary_dict["churn_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS_Changes"].tolist()[0]
+            executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
+            executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
+            executive_summary_dict["aclv_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL_Changes"].tolist()[0] 
+            executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
                 
         print("Dataframe initialization process completed... ")
         settings.EXECUTIVE_SUM_DICT = executive_summary_dict
@@ -781,17 +792,17 @@ def get_time_series_data(request):
     risk_customer_df = settings.RISK_CUSTOMER_DATAFRAME.copy()
     chrun_customer_df = settings.CHURN_CUSTOMER_DATAFRAME.copy()
     executive_summary = settings.EXECUTIVE_SUM_DICT
-    location_name = "Brasserie Blanc Bath"
+    location_name = "The Sun Inn"
     
     
     
-    top_customer_df[top_customer_df["Location"] == "Brasserie Blanc Bath"]
-    low_customer_df[low_customer_df["Location"] == "Brasserie Blanc Bath"]
-    risk_customer_df[risk_customer_df["Location"] == "Brasserie Blanc Bath"]
-    chrun_customer_df[chrun_customer_df["Location"] == "Brasserie Blanc Bath"]
+    top_customer_df[top_customer_df["Location"] == "The Sun Inn"]
+    low_customer_df[low_customer_df["Location"] == "The Sun Inn"]
+    risk_customer_df[risk_customer_df["Location"] == "The Sun Inn"]
+    chrun_customer_df[chrun_customer_df["Location"] == "The Sun Inn"]
     
 
-    age_analytics_df = age_analytics_df[age_analytics_df['Location'] == 'Brasserie Blanc Bath']
+    age_analytics_df = age_analytics_df[age_analytics_df['Location'] == 'The Sun Inn']
     revenue_df = revenue_df[revenue_df['Location'] == location_name]
 
     age_list,age_rev_percentage,age_clv,age_cus_group,age_rev = [],[],[],[],[]
@@ -881,7 +892,7 @@ def get_time_series_data(request):
 @api_view(["GET"])
 def age_based_location_data(request):
     result = {}
-    location = "Brasserie Blanc Bath"
+    location = "The Sun Inn"
     if 'location' in request.GET:
         location = request.query_params["location"]
     age_analytics_df = settings.ANALYTICS_GRAPH_DATAFRAME.copy()
@@ -913,7 +924,7 @@ def age_based_location_data(request):
 @api_view(["GET"])
 def revenue_based_location_data(request):
     result = {}    
-    location = "Brasserie Blanc Bath"
+    location = "The Sun Inn"
     if 'location' in request.GET:
         location = request.query_params["location"]        
     
@@ -928,7 +939,7 @@ def revenue_based_location_data(request):
 @api_view(["GET"])
 def location_based_segment_data(request):    
     result = {}
-    location_name = "Brasserie Blanc Bath"
+    location_name = "The Sun Inn"
     if 'location' in request.GET:
         location_name = request.query_params["location"]
     all_customer_df = settings.ALL_CUSTOMER_DATAFRAME.copy()
@@ -939,7 +950,7 @@ def location_based_segment_data(request):
     risk_customer_df = settings.RISK_CUSTOMER_DATAFRAME.copy()
     chrun_customer_df = settings.CHURN_CUSTOMER_DATAFRAME.copy()
     
-
+    print(location_name)
     all_customer_dic = {"users" : all_customer_df[all_customer_df["Location"] == location_name]["CUS_Users"].tolist()}
     all_customer_dic["frequency"] = all_customer_df[all_customer_df["Location"] == location_name]["CUS_Frequency"].tolist() 
     all_customer_dic["aov"] = all_customer_df[all_customer_df["Location"] == location_name]["CUS_AOV"].tolist()
@@ -972,6 +983,7 @@ def location_based_segment_data(request):
 
     risk_customer_dic = {"users" : risk_customer_df[risk_customer_df["Location"] == location_name]["RISK_Users"].tolist()}
     risk_customer_dic["frequency"] = risk_customer_df[risk_customer_df["Location"] == location_name]["RISK_Frequency"].tolist()
+    risk_customer_dic["aov"] = risk_customer_df[risk_customer_df["Location"] == location_name]["RISK_AOV"].tolist()
     risk_customer_dic["clv"] = risk_customer_df[risk_customer_df["Location"] == location_name]["RISK_CLV"].tolist()
     risk_customer_dic["revenue"] = risk_customer_df[risk_customer_df["Location"] == location_name]["RISK_REVENUE"].tolist()
 
@@ -995,37 +1007,56 @@ def location_based_segment_data(request):
 @api_view(["GET"])
 def location_based_excutive_summary(request):
 
-        summary_location = "Brasserie Blanc Bath"
-        if 'location' in request.GET:
-            summary_location = request.query_params["location"]                            
-
-        #executive summary filter from date & to date
         act_start = ''#'2022-01-01 00:00:00'
         act_end = ''#'2022-04-30 00:00:00'
         year = 2020
         month = 0
         custom_filter = True
         is_filter = False
+        
+        summary_location = "The Sun Inn"
+        if 'location' in request.GET:
+            summary_location = request.query_params["location"]                                                
 
+        if 'year_val' in request.GET:
+            year = int(request.query_params["year_val"])
+            act_start = ''
+            act_end = ''
+        if 'month_val' in request.GET:
+            month = int(request.query_params["month_val"]) 
+
+        if 'start_dt_val' in request.GET:
+            print(type(request.query_params["start_dt_val"]))
+            act_start = str(request.query_params["start_dt_val"]) 
+            print(type(act_start))
+            year = 0
+            month = 0
+        if 'end_dt_val' in request.GET:
+            act_end = str(request.query_params["end_dt_val"])                     
+
+        #executive summary filter from date & to date
+        
+        
         prev_act_start = ''#'2021-01-01 00:00:00'
         prev_act_end = ''#'2021-04-30 00:00:00'
         prev_year = 0
         prev_month = 0
         prev_clv_not_found = False
 
+        print("llllllllllllllll*****************************************************************************************")
+        print(act_start)
+        print(act_end)
+        print(month)
+        print(year)
+        print(summary_location)
+        print("*****************************************************************************************")
+
         #Executive Summary Report
 
         #one time execution
         #thersold date        
 
-        thersold_date = settings.THERSOLD_MAX_DATE
-
-        # act_start = ''#'2022-01-01 00:00:00'
-        # act_end = ''#'2022-04-30 00:00:00'
-        # year = 2021
-        # month = 0
-        # custom_filter = True
-        # is_filter = False
+        thersold_date = settings.THERSOLD_MAX_DATE        
 
         prediction_summary_clv = settings.PREDICTION_CLV_DATAFRAME.copy()
         thersold = thersold_date.split("-")
@@ -1252,32 +1283,33 @@ def location_based_excutive_summary(request):
         executive_summary_df_final.fillna('-', inplace=True)        
         executive_summary_dict = {}
 
-        
-        executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]
-        executive_summary_dict["customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS_Changes"].tolist()[0] 
-        executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]                 
+        if executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size != 0 :
 
-        executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]  
-        executive_summary_dict["orders_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS_Changes"].tolist()[0]
-        executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
-        executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-        executive_summary_dict["revenue_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL_Changes"].tolist()[0] 
-        executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-        executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]  
-        executive_summary_dict["aov_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL_Changes"].tolist()[0]  
-        executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
-        executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]  
-        executive_summary_dict["new_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS_Changes"].tolist()[0] 
-        executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
-        executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]
-        executive_summary_dict["repeat_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS_Changes"].tolist()[0]  
-        executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
-        executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]  
-        executive_summary_dict["churn_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS_Changes"].tolist()[0]
-        executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
-        executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
-        executive_summary_dict["aclv_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL_Changes"].tolist()[0] 
-        executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
+            executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]
+            executive_summary_dict["customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS_Changes"].tolist()[0] 
+            executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]                 
+
+            executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]  
+            executive_summary_dict["orders_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS_Changes"].tolist()[0]
+            executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
+            executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["revenue_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL_Changes"].tolist()[0] 
+            executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]  
+            executive_summary_dict["aov_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL_Changes"].tolist()[0]  
+            executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]  
+            executive_summary_dict["new_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS_Changes"].tolist()[0] 
+            executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
+            executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]
+            executive_summary_dict["repeat_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS_Changes"].tolist()[0]  
+            executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
+            executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]  
+            executive_summary_dict["churn_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS_Changes"].tolist()[0]
+            executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
+            executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
+            executive_summary_dict["aclv_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL_Changes"].tolist()[0] 
+            executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
         result = {}
         result["executive_summary"] = executive_summary_dict
         return JsonResponse(result)
@@ -1285,6 +1317,7 @@ def location_based_excutive_summary(request):
 
 @api_view(["GET"])
 def get_location(request):    
+    
     location_list = ["The Sun Inn", "The Cricketers", "The Jobber\'s Rest", "Brasserie Blanc Winchester",
                  "Brasserie Blanc Portsmouth", "Brasserie Blanc Chichester","The Kings Head","The Boot",
                  "The Oaks","Brasserie Blanc Cheltenham","The Highwayman","Brasserie Blanc Leeds","Brasserie Blanc Threadneedle Street",
