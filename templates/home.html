@@ -16,7 +16,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.min.js"></script>
-    
+    <!-- <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script> -->
     <script src="https://rawgit.com/Anujarya300/bubble_maps/master/data/geography-data/datamaps.none.js"></script>
 
     <link rel="stylesheet"
@@ -125,14 +126,14 @@
 
                         datasets: [
                             {
-                                label: "Revenue",
+                                label: "Revenue (€)",
                                 data: [],
                                 borderColor: "rgba(54, 162, 235, 0.2)",
                                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                             },
 
                             {
-                                label: "Unknown",
+                                label: "Unknown (€)",
                                 hidden: true,
                                 data: [],
                                 borderColor: "rgba(255, 99, 132, 0.2)",
@@ -160,35 +161,30 @@
                         }, plugins: {
                             tooltip: {
                                 callbacks: {
-                                    beforeTitle: function (context) {
-                                        return 'Number of Customer in the age group  :' + number_of_cus[context[0].dataIndex];                    
-                                    },
+                                    // beforeTitle: function (context) {                                                        
+                                    //     return 'No. of customer :' + number_of_cus[context[0].dataIndex];  
+                                    // },
                                     // title:function(context){
                                     //   console.log(context[0].label);
                                     //   return `${context[0].label} Day: ${weekarray[context[0].dataIndex]}`
                                     // },
-                                    afterTitle: function (context) {
-                                        
-                                         return 'Average CLV:' + avg_clv[context[0].dataIndex];
-                                    },
+                                    // afterTitle: function (context) {                                        
+                                         
+                                    // },
                                     beforeBody: function (context) {
-                                        // const newLineArray = [];
-                                        // newLineArray.push('Hello');
-                                        // newLineArray.push('Bye');
-                                        // return newLineArray;
-                                        //return 'No Customer Age Group :' + no_cus_age_group[context[0].dataIndex];;
+                                        return 'No. of customer :' + number_of_cus[context[0].dataIndex];  
                                     },
                                     // beforeLabel:function(context){
-                                    //      return 'Before Label';
+                                    //      return 'Before Label'
                                     // },
                                     // afterLabel: function(context){
-                                    //      return 'After Label';
+                                    //       return 'After Label'+context[0];
                                     // },
-                                    // afterBody:function(context){
-                                    //     return '+++++++++';
-                                    // },
+                                    afterBody:function(context){
+                                        return 'AVG. CLV (€):' + avg_clv[context[0].dataIndex];
+                                    },
                                     afterFooter: function (context) {
-                                        return 'Value of Revenue: ' + value_of_revenue[context[0].dataIndex];;
+                                        return 'Value of Revenue (€): ' + value_of_revenue[context[0].dataIndex];;
                                     },
 
                                 }
@@ -206,7 +202,7 @@
                         labels: [],
                         datasets: [
                             {
-                                label: "Revenue ",
+                                label: "Revenue (€)",
                                 data: [],
                                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                                 borderColor: 'lightgreen',
@@ -227,7 +223,7 @@
                             {
                                 title:
                                 {
-                                    display: true, text: 'Revenue (in $ Millions)'
+                                    display: true, text: 'AVG. Revenue (€)'
                                 }
                             },
                             x:
@@ -252,7 +248,7 @@
 
                         datasets: [
                             {
-                                label: "CLV",
+                                label: "Total CLV (€)",
                                 data: [],
 
                                 backgroundColor: 'red',
@@ -266,7 +262,7 @@
                                 showLine: true
                             },
                             {
-                                label: "Actual",
+                                label: "Total Revenue (€)",
                                 data: [],
                                 backgroundColor: 'blue',
                                 borderColor: 'blue',
@@ -287,7 +283,7 @@
                             {
                                 title:
                                 {
-                                    display: true, text: 'CLV'
+                                    display: true, text: 'Total CLV & Total Revenue (€)'
                                 }
                             }
                             ,
@@ -367,16 +363,27 @@
                     number_of_cus = result["analytics_graph"]["no_cus_age_group"];
                     value_of_revenue = result["analytics_graph"]["val_of_revenue"];
 
-                    avg_clv[7] = 25;
-                    number_of_cus[7] = 25;
-                    value_of_revenue[7] = 25;
+                    avg_clv[7] = result["unknown_avg_clv"];
+                    number_of_cus[7] = result["unknown_tot_cus"];
+                    value_of_revenue[7] = result["unknown_val_of_rev"];
+
+                    for(var i=0;i<avg_clv.length;i++)
+                    {
+                        avg_clv[i] = display_float_value(avg_clv[i]);
+                        number_of_cus[i] = display_int_value(number_of_cus[i]);
+                        value_of_revenue[i] = display_float_value(value_of_revenue[i]);
+                    }
 
 
 
-
+                    var revenue_graph_values = result["revenue_graph"]["transaction_value"];
+                    for(var i=0;i<revenue_graph_values.length;i++)
+                    {
+                        revenue_graph_values[i] = display_float_value(revenue_graph_values[i]);
+                    }
 
                     revenue_graph.data.labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-                    revenue_graph.data.datasets[0]["data"] = result["revenue_graph"]["transaction_value"];
+                    revenue_graph.data.datasets[0]["data"] = revenue_graph_values;
                     revenue_graph.update();
 
                     fill_segment_table_data(result);
@@ -539,7 +546,7 @@
                 url: "/location_based_excutive_summary?location=" + location + filter_values,
                 success: function (result) {
 
-                    $("#fa_loading").hide();
+                    
                     fill_executive_summary_data(result);
 
 
@@ -553,7 +560,7 @@
             var changes_val;
             if (prev_val != "" && prev_val != "-")
             {
-                changes_val = display_float_value((sel_val - prev_val) / (prev_val) * 100);
+                changes_val = display_float_value((sel_val - prev_val) / (prev_val) * 100)+" %";
             }
             else
             {
@@ -563,7 +570,8 @@
             
         }
 
-        function fill_executive_summary_data(result) {
+        function fill_executive_summary_data(result) 
+        {
             if (Object.keys(result["executive_summary"]).length > 0) {
                 $("#cus_sel").text(display_int_value(result["executive_summary"]["customers_selected"]));
                 $("#cus_pre").text(display_int_value(result["executive_summary"]["customers_prev"]));
@@ -633,6 +641,7 @@
                     "                                    <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"\n" +
                     "                                        aria-label=\"Close\"></button></div>");
             }
+            $("#fa_loading").hide();
         }
 
         function fill_segment_table_data(result) {
@@ -1260,8 +1269,8 @@
                                     <div class="row">
                                         <div class="col-md-8">
                                             <h6 class="card-title text-primary">Customer Segmentations <label
-                                                    id="restaurant_name" class="text-secondary"></label> <label
-                                                    id="cs_selectionDate">( 01-08-2019 to
+                                                    id="restaurant_name" ></label> <label
+                                                    id="cs_selectionDate" class="text-info">( 01-08-2019 -
                                                     28-02-2022 )</label> </h6>
                                         </div>
                                         <div class="col-md-4">
@@ -1271,15 +1280,15 @@
                                         </div>
                                     </div>
                                     <hr>
-                                    <table class="table table-bordered table-responsive" id="customer_segmantation">
+                                    <table class="table table-bordered table-responsive" id="customer_segmantation" >
                                         <tbody>
                                             <tr>
-                                                <th class="col-7 bg-secondary"></th>
+                                                <th class="col-3 bg-secondary"></th>
                                                 <th class="col-1 bg-secondary text-white">Users</th>
                                                 <th class="col-1 bg-secondary text-white">Frequency</th>
-                                                <th class="col-1 bg-secondary text-white">AOV</th>
-                                                <th class="col-1 bg-secondary text-white">CLV</th>
-                                                <th class="col-1 bg-secondary text-white">Revenue</th>
+                                                <th class="col-1 bg-secondary text-white">AOV (&#8364;)</th>
+                                                <th class="col-1 bg-secondary text-white">CLV (&#8364;)</th>
+                                                <th class="col-1 bg-secondary text-white">Revenue (&#8364;)</th>
                                             </tr>
                                             <tr>
                                                 <td class="text-primary">Loyals<br /> <label
@@ -1342,11 +1351,10 @@
                                                 <td id="risk_rev"></td>
                                             </tr>
                                             <tr>
-                                                <td class="text-primary">Churned Customers<label class="text-secondary"
-                                                        style="font-size: 12px;">Customer who have not
-                                                        made a Purchase in 2x
+                                                <td class="text-primary">Churned Customers<p><label class="text-secondary" >Customer who have not
+                                                        made a Purchase in 2x</label><br/><label class="text-secondary">
                                                         the average number of days
-                                                        between orders</label></td>
+                                                        between orders</label></p></td>
                                                 <td id="churn_users"></td>
                                                 <td id="churn_freq"></td>
                                                 <td id="churn_aov"></td>
@@ -1366,8 +1374,8 @@
                                     <div class="row">
                                         <div class="col-md-8">
                                             <h6 class="card-title text-primary">Customer Life Time Prediction Vs Actual
-                                                OverTime ( 01-05-2021 to
-                                                30-05-2022 ) <label class="text-secondary" id="ca_fromToDate"></label>
+                                                OverTime  <label class="text-info" id="ca_fromToDate">( 01-05-2021 -
+                                                    30-05-2022 )</label>
                                             </h6>
 
                                         </div>
@@ -1464,7 +1472,7 @@
                                 <div class="card-group">
 
 
-                                    <div class="card">
+                                    <div class="card" >
                                         <div class="card-body">
                                             <select class="form-select" id="selectpicker"
                                                 aria-label="Default select example">
@@ -1528,30 +1536,43 @@
 
                                         </div>
                                     </div>
-
-
-
-
-
                                     <div class="card">
                                         <div class="card-body">
                                             <div class="row">
                                                 <div class="col-lg-10">
                                                     <h5 className="text-secondary">Location <span><i
                                                                 class="fa fa-filter" aria-hidden="true"></i></span></h5>
-                                                </div>
-                                                <div class="col-lg-2"><button class="btn btn-success"
-                                                        onclick="location_based_excutive_summary();">GO</button></div>
+                                                </div>                                                
                                             </div>
                                             <br>
                                             <select id="excutive_summary_list" class="border rounded"
                                                 data-live-search="true" data-width="100%">
                                             </select>
                                         </div>
+                                    </div>                                    
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">                                                
+                                                <div class="col-md-6">&nbsp;</div>
+                                            </div>
+                                            <div class="row">                                                
+                                                <div class="col-md-4">&nbsp;</div>
+                                                <div class="col-md-2 "><button class="btn btn-success btn-lg"
+                                                        onclick="location_based_excutive_summary();">GO</button></div>
+                                            </div>                                                                                        
+                                        </div>
                                     </div>
+
+
+
+
+
+
+
+
+
+
                                 </div>
-
-
                                 <table class="table table-bordered table-responsive" id="executive_summary" width="100">
                                     <tbody>
                                         <tr>
@@ -1573,13 +1594,13 @@
                                             <td id="ord_cha"></td>
                                         </tr>
                                         <tr>
-                                            <td class="text-primary">Revenue</td>
+                                            <td class="text-primary">Revenue (&#8364;)</td>
                                             <td id="rev_sel"></td>
                                             <td id="rev_pre"></td>
                                             <td id="rev_cha"></td>
                                         </tr>
                                         <tr>
-                                            <td class="text-primary">Average Order Value</td>
+                                            <td class="text-primary">Average Order Value (&#8364;)</td>
                                             <td id="aov_sel"></td>
                                             <td id="aov_pre"></td>
                                             <td id="aov_cha"></td>
@@ -1603,7 +1624,7 @@
                                             <td id="churn_cha"></td>
                                         </tr>
                                         <tr>
-                                            <td class="text-primary">Avg Customer Lifetime Value</td>
+                                            <td class="text-primary">Avg Customer Lifetime Value (&#8364;) </td>
                                             <td id="acl_sel"></td>
                                             <td id="acl_pre"></td>
                                             <td id="acl_cha"></td>
