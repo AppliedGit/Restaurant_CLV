@@ -29,6 +29,8 @@
     <script src="https://d3js.org/topojson.v1.min.js"></script>
     <script src="https://rawgit.com/Anujarya300/bubble_maps/master/data/geography-data/datamaps.none.js"></script>
 
+   
+
     <title>ADRA</title>
     <style>
         #customer_segmantation tr td:nth-child(1) {
@@ -96,19 +98,976 @@
             background-color: #a3a3a3;
             ;
         }
-
-        .datamap {
-            margin-left: -230px;
-            margin-top: -80px;
-            width: 800px;
-            height: 415px;
-        }
     </style>
     <script type="text/javascript">
 
         var prediction_graph, age_based_analytics_graph, revenue_graph;
 
-        var avg_clv,number_of_cus,value_of_revenue = [];
+        var avg_clv, number_of_cus, value_of_revenue = [];
+
+        
+
+        let bubbles_clv = [
+                {
+                    latitude: 51.471,
+                    longitude: -2.244,
+                    fillKey: "MAJOR",
+                    radius: 10.3,
+                    state: "Brasserie Blanc Bath",
+                    averageCLV: 103.82,
+                    loyalCustomerPercentage: 1.4,
+                    averageLoyalCLV: 293.60,
+                    numberOfNewCustomer: 3799,
+                    numberOfRepeatCustomer: 214,
+                    revenueFromRepeatCustomer: 18838.30
+                },
+                {
+                    latitude: 51.606,
+                    longitude: -0.623,
+                    fillKey: "MAJOR",
+                    radius: 16.1,
+                    state: "Brasserie Blanc Beaconsfield",
+                    averageCLV: 161.46,
+                    loyalCustomerPercentage: 8.9,
+                    averageLoyalCLV: 492.88,
+                    numberOfNewCustomer: 19950,
+                    numberOfRepeatCustomer: 5455,
+                    revenueFromRepeatCustomer: 567118.65
+                }, {
+                    latitude: 50.715,
+                    longitude: -1.882,
+                    fillKey: "MAJOR",
+                    radius: 12.9,
+                    state: "Brasserie Blanc Bournemouth",
+                    averageCLV: 129.78,
+                    loyalCustomerPercentage: 4.5,
+                    averageLoyalCLV: 492.43,
+                    numberOfNewCustomer: 14599,
+                    numberOfRepeatCustomer: 2080,
+                    revenueFromRepeatCustomer: 218391.97
+                }, {
+                    latitude: 51.515,
+                    longitude: -0.111,
+                    fillKey: "MAJOR",
+                    radius: 16.8,
+                    state: "Brasserie Blanc Chancery Lane",
+                    averageCLV: 168.05,
+                    loyalCustomerPercentage: 2.9,
+                    averageLoyalCLV: 454.75,
+                    numberOfNewCustomer: 7747,
+                    numberOfRepeatCustomer: 752,
+                    revenueFromRepeatCustomer: 85944.16
+                },
+                {
+                    latitude: 51.897,
+                    longitude: -2.08,
+                    fillKey: "MAJOR",
+                    radius: 16.1,
+                    state: "Brasserie Blanc Cheltenham",
+                    averageCLV: 161.57,
+                    loyalCustomerPercentage: 6.9,
+                    averageLoyalCLV: 531.96,
+                    numberOfNewCustomer: 17737,
+                    numberOfRepeatCustomer: 3634,
+                    revenueFromRepeatCustomer: 412922.24
+                }, {
+                    latitude: 50.837,
+                    longitude: -0.773,
+                    fillKey: "MAJOR",
+                    radius: 14.9,
+                    state: "Brasserie Blanc Chichester",
+                    averageCLV: 149.62,
+                    loyalCustomerPercentage: 8.3,
+                    averageLoyalCLV: 500.37,
+                    numberOfNewCustomer: 11780,
+                    numberOfRepeatCustomer: 2615,
+                    revenueFromRepeatCustomer: 250062.36
+                },
+                {
+                    latitude: 53.364,
+                    longitude: -2.297,
+                    fillKey: "MAJOR",
+                    radius: 10.9,
+                    state: "Brasserie Blanc Hale Barns",
+                    averageCLV: 109.02,
+                    loyalCustomerPercentage: 1.7,
+                    averageLoyalCLV: 384.19,
+                    numberOfNewCustomer: 3187,
+                    numberOfRepeatCustomer: 204,
+                    revenueFromRepeatCustomer: 19704.55
+                },
+                {
+                    latitude: 53.305,
+                    longitude: -2.373,
+                    fillKey: "MAJOR",
+                    radius: 11.9,
+                    state: "Brasserie Blanc Knutsford",
+                    averageCLV: 119.80,
+                    loyalCustomerPercentage: 2.2,
+                    averageLoyalCLV: 367.37,
+                    numberOfNewCustomer: 2373,
+                    numberOfRepeatCustomer: 251,
+                    revenueFromRepeatCustomer: 24366.51
+                },
+                {
+                    latitude: 53.793,
+                    longitude: -1.544,
+                    fillKey: "MAJOR",
+                    radius: 17.4,
+                    state: "Brasserie Blanc Leeds",
+                    averageCLV: 174.25,
+                    loyalCustomerPercentage: 6.3,
+                    averageLoyalCLV: 561.71,
+                    numberOfNewCustomer: 11193,
+                    numberOfRepeatCustomer: 2293,
+                    revenueFromRepeatCustomer: 276408.37
+                },
+                {
+                    latitude: 52.037,
+                    longitude: -0.762,
+                    fillKey: "MAJOR",
+                    radius: 16.9,
+                    state: "Brasserie Blanc Milton Keynes",
+                    averageCLV: 169.82,
+                    loyalCustomerPercentage: 7.3,
+                    averageLoyalCLV: 557.56,
+                    numberOfNewCustomer: 10601,
+                    numberOfRepeatCustomer: 2213,
+                    revenueFromRepeatCustomer: 244684.06
+                },
+                {
+                    latitude: 51.761,
+                    longitude: -1.267,
+                    fillKey: "MAJOR",
+                    radius: 14.7,
+                    state: "Brasserie Blanc Oxford",
+                    averageCLV: 147.04,
+                    loyalCustomerPercentage: 5.7,
+                    averageLoyalCLV: 493.16,
+                    numberOfNewCustomer: 14829,
+                    numberOfRepeatCustomer: 2492,
+                    revenueFromRepeatCustomer: 254651.00
+                },
+                {
+                    latitude: 50.796,
+                    longitude: -1.103,
+                    fillKey: "MAJOR",
+                    radius: 15,
+                    state: "Brasserie Blanc Portsmouth",
+                    averageCLV: 150.99,
+                    loyalCustomerPercentage: 5.7,
+                    averageLoyalCLV: 539.61,
+                    numberOfNewCustomer: 11751,
+                    numberOfRepeatCustomer: 2008,
+                    revenueFromRepeatCustomer: 218991.96
+                },
+                {
+                    latitude: 51.506,
+                    longitude: -0.114,
+                    fillKey: "MAJOR",
+                    radius: 14.2,
+                    state: "Brasserie Blanc Southbank",
+                    averageCLV: 142.80,
+                    loyalCustomerPercentage: 3.3,
+                    averageLoyalCLV: 446.57,
+                    numberOfNewCustomer: 19773,
+                    numberOfRepeatCustomer: 2144,
+                    revenueFromRepeatCustomer: 225476.47
+                },
+                {
+                    latitude: 51.514,
+                    longitude: -0.086,
+                    fillKey: "MAJOR",
+                    radius: 16.4,
+                    state: "Brasserie Blanc Threadneedle Street",
+                    averageCLV: 164.138,
+                    loyalCustomerPercentage: 2.7,
+                    averageLoyalCLV: 443.38,
+                    numberOfNewCustomer: 9077,
+                    numberOfRepeatCustomer: 978,
+                    revenueFromRepeatCustomer: 109083.45
+                },
+                {
+                    latitude: 51.512,
+                    longitude: -0.071,
+                    fillKey: "MAJOR",
+                    radius: 15.3,
+                    state: "Brasserie Blanc Tower of London",
+                    averageCLV: 153.56,
+                    loyalCustomerPercentage: 0.5,
+                    averageLoyalCLV: 513.99,
+                    numberOfNewCustomer: 2983,
+                    numberOfRepeatCustomer: 132,
+                    revenueFromRepeatCustomer: 20111.86
+                },
+                {
+                    latitude: 51.065,
+                    longitude: -1.315,
+                    fillKey: "MAJOR",
+                    radius: 14.8,
+                    state: "Brasserie Blanc Winchester",
+                    averageCLV: 148.608,
+                    loyalCustomerPercentage: 5.3,
+                    averageLoyalCLV: 487.30,
+                    numberOfNewCustomer: 15003,
+                    numberOfRepeatCustomer: 2501,
+                    revenueFromRepeatCustomer: 266006.14
+                },
+                {
+                    latitude: 51.488,
+                    longitude: -0.226,
+                    fillKey: "MAJOR",
+                    radius: 16.4,
+                    state: "Fulham Reach",
+                    averageCLV: 164.72,
+                    loyalCustomerPercentage: 5.1,
+                    averageLoyalCLV: 559.47,
+                    numberOfNewCustomer: 7168,
+                    numberOfRepeatCustomer: 1149,
+                    revenueFromRepeatCustomer: 139296.05
+                },
+                {
+                    latitude: 51.237,
+                    longitude: -0.206,
+                    fillKey: "MAJOR",
+                    radius: 15.9,
+                    state: "Reigate",
+                    averageCLV: 159.43,
+                    loyalCustomerPercentage: 8.2,
+                    averageLoyalCLV: 493.96,
+                    numberOfNewCustomer: 10235,
+                    numberOfRepeatCustomer: 2532,
+                    revenueFromRepeatCustomer: 268076.73
+                },
+                {
+                    latitude: 51.244,
+                    longitude: -0.005,
+                    fillKey: "MAJOR",
+                    radius: 15.5,
+                    state: "The Barley Mow",
+                    averageCLV: 155.92,
+                    loyalCustomerPercentage: 9,
+                    averageLoyalCLV: 528.78,
+                    numberOfNewCustomer: 9169,
+                    numberOfRepeatCustomer: 2307,
+                    revenueFromRepeatCustomer: 235017.34
+                },
+                {
+                    latitude: 51.747,
+                    longitude: -0.977,
+                    fillKey: "MAJOR",
+                    radius: 17.7,
+                    state: "The Black Horse - Thame",
+                    averageCLV: 177.81,
+                    loyalCustomerPercentage: 10.6,
+                    averageLoyalCLV: 535.91,
+                    numberOfNewCustomer: 15387,
+                    numberOfRepeatCustomer: 4549,
+                    revenueFromRepeatCustomer: 499212.87
+                },
+                {
+                    latitude: 51.97,
+                    longitude: -0.855,
+                    fillKey: "MAJOR",
+                    radius: 16.9,
+                    state: "The Boot",
+                    averageCLV: 169.90,
+                    loyalCustomerPercentage: 11.3,
+                    averageLoyalCLV: 517.18,
+                    numberOfNewCustomer: 12737,
+                    numberOfRepeatCustomer: 4171,
+                    revenueFromRepeatCustomer: 425112.25
+                },
+                {
+                    latitude: 52.131,
+                    longitude: 0.246,
+                    fillKey: "MAJOR",
+                    radius: 18.0,
+                    state: "The British Queen",
+                    averageCLV: 180.21,
+                    loyalCustomerPercentage: 7.6,
+                    averageLoyalCLV: 568.35,
+                    numberOfNewCustomer: 4449,
+                    numberOfRepeatCustomer: 1076,
+                    revenueFromRepeatCustomer: 125838.30
+                },
+                {
+                    latitude: 51.03,
+                    longitude: -0.958,
+                    fillKey: "MAJOR",
+                    radius: 14.0,
+                    state: "The Cricketers",
+                    averageCLV: 140.42,
+                    loyalCustomerPercentage: 7.6,
+                    averageLoyalCLV: 454.64,
+                    numberOfNewCustomer: 13323,
+                    numberOfRepeatCustomer: 3084,
+                    revenueFromRepeatCustomer: 296301.25
+                },
+                {
+                    latitude: 51.778,
+                    longitude: 0.382,
+                    fillKey: "MAJOR",
+                    radius: 17.6,
+                    state: "The Hare",
+                    averageCLV: 176.91,
+                    loyalCustomerPercentage: 11.1,
+                    averageLoyalCLV: 521.02,
+                    numberOfNewCustomer: 8780,
+                    numberOfRepeatCustomer: 2977,
+                    revenueFromRepeatCustomer: 312597.08
+                },
+                {
+                    latitude: 52.238,
+                    longitude: -0.156,
+                    fillKey: "MAJOR",
+                    radius: 16.3,
+                    state: "The Highwayman",
+                    averageCLV: 163.23,
+                    loyalCustomerPercentage: 8.8,
+                    averageLoyalCLV: 518.96,
+                    numberOfNewCustomer: 9400,
+                    numberOfRepeatCustomer: 2581,
+                    revenueFromRepeatCustomer: 273558.95
+                },
+                {
+                    latitude: 51.558,
+                    longitude: 0.274,
+                    fillKey: "MAJOR",
+                    radius: 19.1,
+                    state: "The Jobber's Rest",
+                    averageCLV: 191.81,
+                    loyalCustomerPercentage: 13.7,
+                    averageLoyalCLV: 570.31,
+                    numberOfNewCustomer: 10806,
+                    numberOfRepeatCustomer: 4158,
+                    revenueFromRepeatCustomer: 441825.86
+                },
+                {
+                    latitude: 51.655,
+                    longitude: -0.107,
+                    fillKey: "MAJOR",
+                    radius: 18.1,
+                    state: "The Jolly Farmer",
+                    averageCLV: 181.61,
+                    loyalCustomerPercentage: 12.5,
+                    averageLoyalCLV: 532.96,
+                    numberOfNewCustomer: 5816,
+                    numberOfRepeatCustomer: 2080,
+                    revenueFromRepeatCustomer: 215648.86
+                },
+                {
+                    latitude: 51.807,
+                    longitude: -0.492,
+                    fillKey: "MAJOR",
+                    radius: 16.1,
+                    state: "The King's Arms",
+                    averageCLV: 161.62,
+                    loyalCustomerPercentage: 9.7,
+                    averageLoyalCLV: 498.43,
+                    numberOfNewCustomer: 8658,
+                    numberOfRepeatCustomer: 2538,
+                    revenueFromRepeatCustomer: 259201.02
+                },
+                {
+                    latitude: 51.47,
+                    longitude: -0.521,
+                    fillKey: "MAJOR",
+                    radius: 18.7,
+                    state: "The Kings Head",
+                    averageCLV: 187.66,
+                    loyalCustomerPercentage: 11.4,
+                    averageLoyalCLV: 554.12,
+                    numberOfNewCustomer: 11642,
+                    numberOfRepeatCustomer: 3920,
+                    revenueFromRepeatCustomer: 439083.54
+                },
+                {
+                    latitude: 51.278,
+                    longitude: -0.511,
+                    fillKey: "MAJOR",
+                    radius: 15.8,
+                    state: "The March Hare",
+                    averageCLV: 158.68,
+                    loyalCustomerPercentage: 7.4,
+                    averageLoyalCLV: 484.89,
+                    numberOfNewCustomer: 17338,
+                    numberOfRepeatCustomer: 4162,
+                    revenueFromRepeatCustomer: 453726.17
+                },
+                {
+                    latitude: 51.67,
+                    longitude: -0.497,
+                    fillKey: "MAJOR",
+                    radius: 15.4,
+                    state: "The Oaks",
+                    averageCLV: 154.08,
+                    loyalCustomerPercentage: 9.1,
+                    averageLoyalCLV: 525.04,
+                    numberOfNewCustomer: 14740,
+                    numberOfRepeatCustomer: 3721,
+                    revenueFromRepeatCustomer: 375815.65
+                },
+                {
+                    latitude: 51.429,
+                    longitude: -0.935,
+                    fillKey: "MAJOR",
+                    radius: 13.7,
+                    state: "The Oakwood",
+                    averageCLV: 137.77,
+                    loyalCustomerPercentage: 3,
+                    averageLoyalCLV: 393.08,
+                    numberOfNewCustomer: 2062,
+                    numberOfRepeatCustomer: 230,
+                    revenueFromRepeatCustomer: 28099.98
+                },
+                {
+                    latitude: 51.385,
+                    longitude: -0.56,
+                    fillKey: "MAJOR",
+                    radius: 16.9,
+                    state: "The Queens Head",
+                    averageCLV: 169.14,
+                    loyalCustomerPercentage: 9,
+                    averageLoyalCLV: 543.46,
+                    numberOfNewCustomer: 10735,
+                    numberOfRepeatCustomer: 2863,
+                    revenueFromRepeatCustomer: 318708.72
+                },
+                {
+                    latitude: 51.063,
+                    longitude: -0.326,
+                    fillKey: "MAJOR",
+                    radius: 15.9,
+                    state: "The Red Deer",
+                    averageCLV: 159.79,
+                    loyalCustomerPercentage: 7.7,
+                    averageLoyalCLV: 476.77,
+                    numberOfNewCustomer: 10151,
+                    numberOfRepeatCustomer: 2575,
+                    revenueFromRepeatCustomer: 274943.31
+                },
+                {
+                    latitude: 51.372,
+                    longitude: -0.468,
+                    fillKey: "MAJOR",
+                    radius: 16.4,
+                    state: "The Sun Inn",
+                    averageCLV: 164.56,
+                    loyalCustomerPercentage: 11.1,
+                    averageLoyalCLV: 525.81,
+                    numberOfNewCustomer: 11303,
+                    numberOfRepeatCustomer: 3624,
+                    revenueFromRepeatCustomer: 365301.47
+                }, {
+                    latitude: 51.507,
+                    longitude: -0.945,
+                    fillKey: "MAJOR",
+                    radius: 17.6,
+                    state: "The Victoria",
+                    averageCLV: 176.05,
+                    loyalCustomerPercentage: 4.5,
+                    averageLoyalCLV: 610.83,
+                    numberOfNewCustomer: 1550,
+                    numberOfRepeatCustomer: 214,
+                    revenueFromRepeatCustomer: 30647.78
+                },
+                {
+                    latitude: 51.546,
+                    longitude: -0.025,
+                    fillKey: "MAJOR",
+                    radius: 17.6,
+                    state: "The White Bear",
+                    averageCLV: 176.19,
+                    loyalCustomerPercentage: 13.1,
+                    averageLoyalCLV: 491.71,
+                    numberOfNewCustomer: 8848,
+                    numberOfRepeatCustomer: 3342,
+                    revenueFromRepeatCustomer: 329375.72
+                }
+            ]
+        
+        let bubbles_revenue = [
+                {
+                    latitude: 51.471,
+                    longitude: -2.244,
+                    fillKey: "MINOR",
+                    radius: 1.88,
+                    state: "Brasserie Blanc Bath",
+                    averageCLV: 103.82,
+                    loyalCustomerPercentage: 1.4,
+                    averageLoyalCLV: 293.60,
+                    numberOfNewCustomer: 3799,
+                    numberOfRepeatCustomer: 214,
+                    revenueFromRepeatCustomer: 18838.30
+                },
+                {
+                    latitude: 51.606,
+                    longitude: -0.623,
+                    fillKey: "MINOR",
+                    radius: 5.6711,
+                    state: "Brasserie Blanc Beaconsfield",
+                    averageCLV: 161.46,
+                    loyalCustomerPercentage: 8.9,
+                    averageLoyalCLV: 492.88,
+                    numberOfNewCustomer: 19950,
+                    numberOfRepeatCustomer: 5455,
+                    revenueFromRepeatCustomer: 567118.65
+                }, {
+                    latitude: 50.715,
+                    longitude: -1.882,
+                    fillKey: "MINOR",
+                    radius: 2.18391,
+                    state: "Brasserie Blanc Bournemouth",
+                    averageCLV: 129.78,
+                    loyalCustomerPercentage: 4.5,
+                    averageLoyalCLV: 492.43,
+                    numberOfNewCustomer: 14599,
+                    numberOfRepeatCustomer: 2080,
+                    revenueFromRepeatCustomer: 218391.97
+                }, {
+                    latitude: 51.515,
+                    longitude: -0.111,
+                    fillKey: "MINOR",
+                    radius: 8.5944,
+                    state: "Brasserie Blanc Chancery Lane",
+                    averageCLV: 168.05,
+                    loyalCustomerPercentage: 2.9,
+                    averageLoyalCLV: 454.75,
+                    numberOfNewCustomer: 7747,
+                    numberOfRepeatCustomer: 752,
+                    revenueFromRepeatCustomer: 85944.16
+                },
+                {
+                    latitude: 51.897,
+                    longitude: -2.08,
+                    fillKey: "MINOR",
+                    radius: 41.2922,
+                    state: "Brasserie Blanc Cheltenham",
+                    averageCLV: 161.57,
+                    loyalCustomerPercentage: 6.9,
+                    averageLoyalCLV: 531.96,
+                    numberOfNewCustomer: 17737,
+                    numberOfRepeatCustomer: 3634,
+                    revenueFromRepeatCustomer: 412922.24
+                }, {
+                    latitude: 50.837,
+                    longitude: -0.773,
+                    fillKey: "MINOR",
+                    radius: 25.0062,
+                    state: "Brasserie Blanc Chichester",
+                    averageCLV: 149.62,
+                    loyalCustomerPercentage: 8.3,
+                    averageLoyalCLV: 500.37,
+                    numberOfNewCustomer: 11780,
+                    numberOfRepeatCustomer: 2615,
+                    revenueFromRepeatCustomer: 250062.36
+                },
+                {
+                    latitude: 53.364,
+                    longitude: -2.297,
+                    fillKey: "MINOR",
+                    radius: 1.9704,
+                    state: "Brasserie Blanc Hale Barns",
+                    averageCLV: 109.02,
+                    loyalCustomerPercentage: 1.7,
+                    averageLoyalCLV: 384.19,
+                    numberOfNewCustomer: 3187,
+                    numberOfRepeatCustomer: 204,
+                    revenueFromRepeatCustomer: 19704.55
+                },
+                {
+                    latitude: 53.305,
+                    longitude: -2.373,
+                    fillKey: "MINOR",
+                    radius: 2.4366,
+                    state: "Brasserie Blanc Knutsford",
+                    averageCLV: 119.80,
+                    loyalCustomerPercentage: 2.2,
+                    averageLoyalCLV: 367.37,
+                    numberOfNewCustomer: 2373,
+                    numberOfRepeatCustomer: 251,
+                    revenueFromRepeatCustomer: 24366.51
+                },
+                {
+                    latitude: 53.793,
+                    longitude: -1.544,
+                    fillKey: "MINOR",
+                    radius: 27.6408,
+                    state: "Brasserie Blanc Leeds",
+                    averageCLV: 174.25,
+                    loyalCustomerPercentage: 6.3,
+                    averageLoyalCLV: 561.71,
+                    numberOfNewCustomer: 11193,
+                    numberOfRepeatCustomer: 2293,
+                    revenueFromRepeatCustomer: 276408.37
+                },
+                {
+                    latitude: 52.037,
+                    longitude: -0.762,
+                    fillKey: "MINOR",
+                    radius: 24.4684,
+                    state: "Brasserie Blanc Milton Keynes",
+                    averageCLV: 169.82,
+                    loyalCustomerPercentage: 7.3,
+                    averageLoyalCLV: 557.56,
+                    numberOfNewCustomer: 10601,
+                    numberOfRepeatCustomer: 2213,
+                    revenueFromRepeatCustomer: 244684.06
+                },
+                {
+                    latitude: 51.761,
+                    longitude: -1.267,
+                    fillKey: "MINOR",
+                    radius: 25.4651,
+                    state: "Brasserie Blanc Oxford",
+                    averageCLV: 147.04,
+                    loyalCustomerPercentage: 5.7,
+                    averageLoyalCLV: 493.16,
+                    numberOfNewCustomer: 14829,
+                    numberOfRepeatCustomer: 2492,
+                    revenueFromRepeatCustomer: 254651.03
+                },
+                {
+                    latitude: 50.796,
+                    longitude: -1.103,
+                    fillKey: "MINOR",
+                    radius: 21.8991,
+                    state: "Brasserie Blanc Portsmouth",
+                    averageCLV: 150.99,
+                    loyalCustomerPercentage: 5.7,
+                    averageLoyalCLV: 539.61,
+                    numberOfNewCustomer: 11751,
+                    numberOfRepeatCustomer: 2008,
+                    revenueFromRepeatCustomer: 218991.96
+                },
+                {
+                    latitude: 51.506,
+                    longitude: -0.114,
+                    fillKey: "MINOR",
+                    radius: 22.5476,
+                    state: "Brasserie Blanc Southbank",
+                    averageCLV: 142.80,
+                    loyalCustomerPercentage: 3.3,
+                    averageLoyalCLV: 446.57,
+                    numberOfNewCustomer: 19773,
+                    numberOfRepeatCustomer: 2144,
+                    revenueFromRepeatCustomer: 225476.47
+                },
+                {
+                    latitude: 51.514,
+                    longitude: -0.086,
+                    fillKey: "MINOR",
+                    radius: 10.9083,
+                    state: "Brasserie Blanc Threadneedle Street",
+                    averageCLV: 164.13,
+                    loyalCustomerPercentage: 2.7,
+                    averageLoyalCLV: 443.38,
+                    numberOfNewCustomer: 9077,
+                    numberOfRepeatCustomer: 978,
+                    revenueFromRepeatCustomer: 109083.45
+                },
+                {
+                    latitude: 51.512,
+                    longitude: -0.071,
+                    fillKey: "MINOR",
+                    radius: 2.0111,
+                    state: "Brasserie Blanc Tower of London",
+                    averageCLV: 153.56,
+                    loyalCustomerPercentage: 0.5,
+                    averageLoyalCLV: 513.993,
+                    numberOfNewCustomer: 2983,
+                    numberOfRepeatCustomer: 132,
+                    revenueFromRepeatCustomer: 20111.86
+                },
+                {
+                    latitude: 51.065,
+                    longitude: -1.315,
+                    fillKey: "MINOR",
+                    radius: 26.6006,
+                    state: "Brasserie Blanc Winchester",
+                    averageCLV: 148.60,
+                    loyalCustomerPercentage: 5.3,
+                    averageLoyalCLV: 487.30,
+                    numberOfNewCustomer: 15003,
+                    numberOfRepeatCustomer: 2501,
+                    revenueFromRepeatCustomer: 266006.14
+                },
+                {
+                    latitude: 51.488,
+                    longitude: -0.226,
+                    fillKey: "MINOR",
+                    radius: 13.92964,
+                    state: "Fulham Reach",
+                    averageCLV: 164.72,
+                    loyalCustomerPercentage: 5.1,
+                    averageLoyalCLV: 559.47,
+                    numberOfNewCustomer: 7168,
+                    numberOfRepeatCustomer: 1149,
+                    revenueFromRepeatCustomer: 139296.05
+                },
+                {
+                    latitude: 51.237,
+                    longitude: -0.206,
+                    fillKey: "MINOR",
+                    radius: 26.8076,
+                    state: "Reigate",
+                    averageCLV: 159.43,
+                    loyalCustomerPercentage: 8.2,
+                    averageLoyalCLV: 493.96,
+                    numberOfNewCustomer: 10235,
+                    numberOfRepeatCustomer: 2532,
+                    revenueFromRepeatCustomer: 268076.73
+                },
+                {
+                    latitude: 51.244,
+                    longitude: -0.005,
+                    fillKey: "MINOR",
+                    radius: 23.5017,
+                    state: "The Barley Mow",
+                    averageCLV: 155.92,
+                    loyalCustomerPercentage: 9,
+                    averageLoyalCLV: 528.78,
+                    numberOfNewCustomer: 9169,
+                    numberOfRepeatCustomer: 2307,
+                    revenueFromRepeatCustomer: 235017.34
+                },
+                {
+                    latitude: 51.747,
+                    longitude: -0.977,
+                    fillKey: "MINOR",
+                    radius: 49.9212,
+                    state: "The Black Horse - Thame",
+                    averageCLV: 177.81,
+                    loyalCustomerPercentage: 10.6,
+                    averageLoyalCLV: 535.91,
+                    numberOfNewCustomer: 15387,
+                    numberOfRepeatCustomer: 4549,
+                    revenueFromRepeatCustomer: 499212.87
+                },
+                {
+                    latitude: 51.97,
+                    longitude: -0.855,
+                    fillKey: "MINOR",
+                    radius: 42.5112,
+                    state: "The Boot",
+                    averageCLV: 169.90,
+                    loyalCustomerPercentage: 11.3,
+                    averageLoyalCLV: 517.18,
+                    numberOfNewCustomer: 12737,
+                    numberOfRepeatCustomer: 4171,
+                    revenueFromRepeatCustomer: 425112.25
+                },
+                {
+                    latitude: 52.131,
+                    longitude: 0.246,
+                    fillKey: "MINOR",
+                    radius: 12.5838,
+                    state: "The British Queen",
+                    averageCLV: 180.21,
+                    loyalCustomerPercentage: 7.6,
+                    averageLoyalCLV: 568.35,
+                    numberOfNewCustomer: 4449,
+                    numberOfRepeatCustomer: 1076,
+                    revenueFromRepeatCustomer: 125838.30
+                },
+                {
+                    latitude: 51.03,
+                    longitude: -0.958,
+                    fillKey: "MINOR",
+                    radius: 29.6301,
+                    state: "The Cricketers",
+                    averageCLV: 140.42,
+                    loyalCustomerPercentage: 7.6,
+                    averageLoyalCLV: 454.64,
+                    numberOfNewCustomer: 13323,
+                    numberOfRepeatCustomer: 3084,
+                    revenueFromRepeatCustomer: 296301.25
+                },
+                {
+                    latitude: 51.778,
+                    longitude: 0.382,
+                    fillKey: "MINOR",
+                    radius: 31.2597,
+                    state: "The Hare",
+                    averageCLV: 176.91,
+                    loyalCustomerPercentage: 11.1,
+                    averageLoyalCLV: 521.02,
+                    numberOfNewCustomer: 8780,
+                    numberOfRepeatCustomer: 2977,
+                    revenueFromRepeatCustomer: 312597.08
+                },
+                {
+                    latitude: 52.238,
+                    longitude: -0.156,
+                    fillKey: "MINOR",
+                    radius: 27.3558,
+                    state: "The Highwayman",
+                    averageCLV: 163.23,
+                    loyalCustomerPercentage: 8.8,
+                    averageLoyalCLV: 518.96,
+                    numberOfNewCustomer: 9400,
+                    numberOfRepeatCustomer: 2581,
+                    revenueFromRepeatCustomer: 273558.95
+                },
+                {
+                    latitude: 51.558,
+                    longitude: 0.274,
+                    fillKey: "MINOR",
+                    radius: 44.1825,
+                    state: "The Jobber's Rest",
+                    averageCLV: 191.81,
+                    loyalCustomerPercentage: 13.7,
+                    averageLoyalCLV: 570.31,
+                    numberOfNewCustomer: 10806,
+                    numberOfRepeatCustomer: 4158,
+                    revenueFromRepeatCustomer: 441825.86
+                },
+                {
+                    latitude: 51.655,
+                    longitude: -0.107,
+                    fillKey: "MINOR",
+                    radius: 21.5648,
+                    state: "The Jolly Farmer",
+                    averageCLV: 181.61,
+                    loyalCustomerPercentage: 12.5,
+                    averageLoyalCLV: 532.96,
+                    numberOfNewCustomer: 5816,
+                    numberOfRepeatCustomer: 2080,
+                    revenueFromRepeatCustomer: 215648.86
+                },
+                {
+                    latitude: 51.807,
+                    longitude: -0.492,
+                    fillKey: "MINOR",
+                    radius: 25.9201,
+                    state: "The King's Arms",
+                    averageCLV: 161.62,
+                    loyalCustomerPercentage: 9.7,
+                    averageLoyalCLV: 498.43,
+                    numberOfNewCustomer: 8658,
+                    numberOfRepeatCustomer: 2538,
+                    revenueFromRepeatCustomer: 259201.02
+                },
+                {
+                    latitude: 51.47,
+                    longitude: -0.521,
+                    fillKey: "MINOR",
+                    radius: 43.9083,
+                    state: "The Kings Head",
+                    averageCLV: 187.66,
+                    loyalCustomerPercentage: 11.4,
+                    averageLoyalCLV: 554.12,
+                    numberOfNewCustomer: 11642,
+                    numberOfRepeatCustomer: 3920,
+                    revenueFromRepeatCustomer: 439083.54
+                },
+                {
+                    latitude: 51.278,
+                    longitude: -0.511,
+                    fillKey: "MINOR",
+                    radius: 45.3726,
+                    state: "The March Hare",
+                    averageCLV: 158.68,
+                    loyalCustomerPercentage: 7.4,
+                    averageLoyalCLV: 484.89,
+                    numberOfNewCustomer: 17338,
+                    numberOfRepeatCustomer: 4162,
+                    revenueFromRepeatCustomer: 453726.17
+                },
+                {
+                    latitude: 51.67,
+                    longitude: -0.497,
+                    fillKey: "MINOR",
+                    radius: 37.5815,
+                    state: "The Oaks",
+                    averageCLV: 154.08,
+                    loyalCustomerPercentage: 9.1,
+                    averageLoyalCLV: 525.04,
+                    numberOfNewCustomer: 14740,
+                    numberOfRepeatCustomer: 3721,
+                    revenueFromRepeatCustomer: 375815.65
+                },
+                {
+                    latitude: 51.429,
+                    longitude: -0.935,
+                    fillKey: "MINOR",
+                    radius: 2.8099,
+                    state: "The Oakwood",
+                    averageCLV: 137.77,
+                    loyalCustomerPercentage: 3,
+                    averageLoyalCLV: 393.08,
+                    numberOfNewCustomer: 2062,
+                    numberOfRepeatCustomer: 230,
+                    revenueFromRepeatCustomer: 28099.98
+                },
+                {
+                    latitude: 51.385,
+                    longitude: -0.56,
+                    fillKey: "MINOR",
+                    radius: 31.8708,
+                    state: "The Queens Head",
+                    averageCLV: 169.14,
+                    loyalCustomerPercentage: 9,
+                    averageLoyalCLV: 543.46,
+                    numberOfNewCustomer: 10735,
+                    numberOfRepeatCustomer: 2863,
+                    revenueFromRepeatCustomer: 318708.72
+                },
+                {
+                    latitude: 51.063,
+                    longitude: -0.326,
+                    fillKey: "MINOR",
+                    radius: 27.4943,
+                    state: "The Red Deer",
+                    averageCLV: 159.79,
+                    loyalCustomerPercentage: 7.7,
+                    averageLoyalCLV: 476.77,
+                    numberOfNewCustomer: 10151,
+                    numberOfRepeatCustomer: 2575,
+                    revenueFromRepeatCustomer: 274943.31
+                },
+                {
+                    latitude: 51.372,
+                    longitude: -0.468,
+                    fillKey: "MINOR",
+                    radius: 36.5301,
+                    state: "The Sun Inn",
+                    averageCLV: 164.56,
+                    loyalCustomerPercentage: 11.1,
+                    averageLoyalCLV: 525.81,
+                    numberOfNewCustomer: 11303,
+                    numberOfRepeatCustomer: 3624,
+                    revenueFromRepeatCustomer: 365301.47
+                }, {
+                    latitude: 51.507,
+                    longitude: -0.945,
+                    fillKey: "MINOR",
+                    radius: 3.06476,
+                    state: "The Victoria",
+                    averageCLV: 176.05,
+                    loyalCustomerPercentage: 4.5,
+                    averageLoyalCLV: 610.83,
+                    numberOfNewCustomer: 1550,
+                    numberOfRepeatCustomer: 214,
+                    revenueFromRepeatCustomer: 30647.78
+                },
+                {
+                    latitude: 51.546,
+                    longitude: -0.025,
+                    fillKey: "MINOR",
+                    radius: 32.9375,
+                    state: "The White Bear",
+                    averageCLV: 176.19,
+                    loyalCustomerPercentage: 13.1,
+                    averageLoyalCLV: 491.71,
+                    numberOfNewCustomer: 8848,
+                    numberOfRepeatCustomer: 3342,
+                    revenueFromRepeatCustomer: 329375.72
+                }
+            ]
+        
+        var bubble_map;
 
         $(document).ready(function () {
             const chart_age = document.querySelectorAll(".chart");
@@ -116,6 +1075,32 @@
             const chartMuliaxis = document.querySelectorAll(".chartPie");
 
 
+            bubble_map = new Datamap({
+                element: document.getElementById('uk'),
+                scope: 'GBR_adm2',
+                geographyConfig: {
+                    popupOnHover: false,
+                    highlightOnHover: false,
+                    borderColor: '#444',
+                    borderWidth: 0.5,
+                    dataUrl: 'https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-kingdom/uk-counties.json'
+                    //dataJson: topoJsonData
+                },
+                fills: {
+                    'MAJOR': '#306596',
+                    'MEDIUM': '#0fa0fa',
+                    'MINOR': '#bada55',
+                    defaultFill: '#dddddd'
+                },
+                setProjection: function (element) {
+                    var projection = d3.geo.mercator()
+                        .center([-1.0, 55]) // always in [East Latitude, North Longitude]
+                        //                    .center([-5.961803, 55.780919]) // always in [East Latitude, North Longitude]
+                        .scale(5000);
+                    var path = d3.geo.path().projection(projection);
+                    return { path: path, projection: projection };
+                }
+            });
 
             chart_age.forEach(function (chart) {
                 var ctx = chart.getContext("2d");
@@ -169,10 +1154,10 @@
                                     //   return `${context[0].label} Day: ${weekarray[context[0].dataIndex]}`
                                     // },
                                     // afterTitle: function (context) {                                        
-                                         
+
                                     // },
                                     beforeBody: function (context) {
-                                        return 'No. of customer :' + number_of_cus[context[0].dataIndex];  
+                                        return 'No. of customer :' + number_of_cus[context[0].dataIndex];
                                     },
                                     // beforeLabel:function(context){
                                     //      return 'Before Label'
@@ -180,7 +1165,7 @@
                                     // afterLabel: function(context){
                                     //       return 'After Label'+context[0];
                                     // },
-                                    afterBody:function(context){
+                                    afterBody: function (context) {
                                         return 'AVG. CLV (€):' + avg_clv[context[0].dataIndex];
                                     },
                                     afterFooter: function (context) {
@@ -208,7 +1193,8 @@
                                 borderColor: 'lightgreen',
                                 tension: 0.4,
                                 fill: true,
-                                pointRadius: 0,
+                                pointRadius: 2,
+                                borderRadius: 2,
                                 pointStyle: 'rect',
                                 pointBorderColor: 'green',
                                 pointBackgroundColor: '#fff',
@@ -335,7 +1321,7 @@
             // To style all selects
             $('.selectpicker').selectpicker();
             $('.selectpicker1').selectpicker();
-            $('.selectpicker2').selectpicker();            
+            $('.selectpicker2').selectpicker();
 
         });
 
@@ -348,9 +1334,9 @@
 
                     prediction_graph.data.labels = result["prediction_graph"]["day_of_year"];
                     prediction_graph.data.datasets[0]["data"] = result["prediction_graph"]["prediction_val"];
-                    prediction_graph.data.datasets[1]["data"] = result["prediction_graph"]["transaction_val"];                                                            
+                    prediction_graph.data.datasets[1]["data"] = result["prediction_graph"]["transaction_val"];
                     prediction_graph.update();
-                    
+
 
                     var analytics_label_arr = result["analytics_graph"]["age_category"];
                     analytics_label_arr[7] = "Unknown";
@@ -367,8 +1353,7 @@
                     number_of_cus[7] = result["unknown_tot_cus"];
                     value_of_revenue[7] = result["unknown_val_of_rev"];
 
-                    for(var i=0;i<avg_clv.length;i++)
-                    {
+                    for (var i = 0; i < avg_clv.length; i++) {
                         avg_clv[i] = display_float_value(avg_clv[i]);
                         number_of_cus[i] = display_int_value(number_of_cus[i]);
                         value_of_revenue[i] = display_float_value(value_of_revenue[i]);
@@ -377,8 +1362,7 @@
 
 
                     var revenue_graph_values = result["revenue_graph"]["transaction_value"];
-                    for(var i=0;i<revenue_graph_values.length;i++)
-                    {
+                    for (var i = 0; i < revenue_graph_values.length; i++) {
                         revenue_graph_values[i] = display_float_value(revenue_graph_values[i]);
                     }
 
@@ -391,6 +1375,7 @@
                     fill_executive_summary_data(result);
 
                     display_map(result["prediction_graph"]);
+                    change_map_data('clv');
 
                 }
             });
@@ -484,7 +1469,7 @@
                     age_based_analytics_graph.data.datasets[1]["data"] = [0, 0, 0, 0, 0, 0, 0, parseFloat(result["analytics_graph_unknown"])];
                     age_based_analytics_graph.update();
 
-                    
+
 
                 }
             });
@@ -546,7 +1531,7 @@
                 url: "/location_based_excutive_summary?location=" + location + filter_values,
                 success: function (result) {
 
-                    
+
                     fill_executive_summary_data(result);
 
 
@@ -555,55 +1540,51 @@
             });
         }
 
-        function calculate_changes_val(sel_val,prev_val)
-        {
+        function calculate_changes_val(sel_val, prev_val) {
             var changes_val;
-            if (prev_val != "" && prev_val != "-")
-            {
-                changes_val = display_float_value((sel_val - prev_val) / (prev_val) * 100)+" %";
+            if (prev_val != "" && prev_val != "-") {
+                changes_val = display_float_value((sel_val - prev_val) / (prev_val) * 100) + " %";
             }
-            else
-            {
+            else {
                 changes_val = "-";
             }
-            return changes_val;            
-            
+            return changes_val;
+
         }
 
-        function fill_executive_summary_data(result) 
-        {
+        function fill_executive_summary_data(result) {
             if (Object.keys(result["executive_summary"]).length > 0) {
                 $("#cus_sel").text(display_int_value(result["executive_summary"]["customers_selected"]));
                 $("#cus_pre").text(display_int_value(result["executive_summary"]["customers_prev"]));
-                $("#cus_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["customers_selected"]),display_int_value(result["executive_summary"]["customers_prev"])));
+                $("#cus_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["customers_selected"]), display_int_value(result["executive_summary"]["customers_prev"])));
 
                 $("#ord_sel").text(display_int_value(result["executive_summary"]["orders_selected"]));
                 $("#ord_pre").text(display_int_value(result["executive_summary"]["orders_prev"]));
-                $("#ord_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["orders_selected"]),display_int_value(result["executive_summary"]["orders_prev"])));
+                $("#ord_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["orders_selected"]), display_int_value(result["executive_summary"]["orders_prev"])));
 
                 $("#rev_sel").text(display_float_value(result["executive_summary"]["revenue_selected"]));
                 $("#rev_pre").text(display_float_value(result["executive_summary"]["revenue_prev"]));
-                $("#rev_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["revenue_selected"]),display_float_value(result["executive_summary"]["revenue_prev"])));
+                $("#rev_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["revenue_selected"]), display_float_value(result["executive_summary"]["revenue_prev"])));
 
                 $("#aov_sel").text(display_float_value(result["executive_summary"]["aov_selected"]));
                 $("#aov_pre").text(display_float_value(result["executive_summary"]["aov_prev"]));
-                $("#aov_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["aov_selected"]),display_float_value(result["executive_summary"]["aov_prev"])));
+                $("#aov_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["aov_selected"]), display_float_value(result["executive_summary"]["aov_prev"])));
 
                 $("#newcus_sel").text(display_int_value(result["executive_summary"]["new_customers_selected"]));
                 $("#newcus_pre").text(display_int_value(result["executive_summary"]["new_customers_prev"]));
-                $("#newcus_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["new_customers_selected"]),display_int_value(result["executive_summary"]["new_customers_prev"])));
+                $("#newcus_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["new_customers_selected"]), display_int_value(result["executive_summary"]["new_customers_prev"])));
 
                 $("#rep_sel").text(display_int_value(result["executive_summary"]["repeat_customers_selected"]));
                 $("#rep_pre").text(display_int_value(result["executive_summary"]["repeat_customers_prev"]));
-                $("#rep_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["repeat_customers_selected"]),display_int_value(result["executive_summary"]["repeat_customers_prev"])));
+                $("#rep_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["repeat_customers_selected"]), display_int_value(result["executive_summary"]["repeat_customers_prev"])));
 
                 $("#churn_sel").text(display_int_value(result["executive_summary"]["churn_customers_selected"]));
                 $("#churn_pre").text(display_int_value(result["executive_summary"]["churn_customers_prev"]));
-                $("#churn_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["churn_customers_selected"]),display_int_value(result["executive_summary"]["churn_customers_prev"])));
+                $("#churn_cha").text(calculate_changes_val(display_int_value(result["executive_summary"]["churn_customers_selected"]), display_int_value(result["executive_summary"]["churn_customers_prev"])));
 
                 $("#acl_sel").text(display_float_value(result["executive_summary"]["aclv_customers_selected"]));
                 $("#acl_pre").text(display_float_value(result["executive_summary"]["aclv_customers_prev"]));
-                $("#acl_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["aclv_customers_selected"]),display_float_value(result["executive_summary"]["aclv_customers_prev"])));
+                $("#acl_cha").text(calculate_changes_val(display_float_value(result["executive_summary"]["aclv_customers_selected"]), display_float_value(result["executive_summary"]["aclv_customers_prev"])));
             }
             else {
                 $("#cus_sel").text("-");
@@ -714,525 +1695,36 @@
 
         function display_map(map_data) {
 
-            var bubble_map = new Datamap({
-                element: document.getElementById('uk'),
-                scope: 'GBR_adm2',
-                geographyConfig: {
-                    popupOnHover: false,
-                    highlightOnHover: false,
-                    borderColor: '#444',
-                    borderWidth: 0.5,
-                    dataUrl: 'https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-kingdom/uk-counties.json'
-                    //dataJson: topoJsonData
-                },
-                fills: {
-                    'MAJOR': '#306596',
-                    'MEDIUM': '#0fa0fa',
-                    'MINOR': '#bada55',
-                    defaultFill: '#dddddd'
-                },
-                setProjection: function (element) {
-                    var projection = d3.geo.mercator()
-                        .center([-5.961803, 55.780919]) // always in [East Latitude, North Longitude]
-                        //                    .center([-5.961803, 55.780919]) // always in [East Latitude, North Longitude]
-                        .scale(1000);
-                    var path = d3.geo.path().projection(projection);
-                    return { path: path, projection: projection };
-                }
-            });
+            
 
 
-            let bubbles = [
-                {
-                    latitude: 51.471,
-                    longitude: -2.244,
-                    fillKey: "MAJOR",
-                    radius: 10.3,
-                    state: "Brasserie Blanc Bath",
-                    averageCLV: 103.8206489863,
-                    loyalCustomerPercentage: 1.4,
-                    averageLoyalCLV: 293.6058869476,
-                    numberOfNewCustomer: 3799,
-                    numberOfRepeatCustomer: 214,
-                    revenueFromRepeatCustomer: 18838.3017857143
-                },
-                {
-                    latitude: 51.606,
-                    longitude: -0.623,
-                    fillKey: "MAJOR",
-                    radius: 16.1,
-                    state: "Brasserie Blanc Beaconsfield",
-                    averageCLV: 161.4629086277,
-                    loyalCustomerPercentage: 8.9,
-                    averageLoyalCLV: 492.8855093322,
-                    numberOfNewCustomer: 19950,
-                    numberOfRepeatCustomer: 5455,
-                    revenueFromRepeatCustomer: 567118.6513950232
-                }, {
-                    latitude: 50.715,
-                    longitude: -1.882,
-                    fillKey: "MAJOR",
-                    radius: 12.9,
-                    state: "Brasserie Blanc Bournemouth",
-                    averageCLV: 129.7810401306,
-                    loyalCustomerPercentage: 4.5,
-                    averageLoyalCLV: 492.4317605721,
-                    numberOfNewCustomer: 14599,
-                    numberOfRepeatCustomer: 2080,
-                    revenueFromRepeatCustomer: 218391.9788722885
-                }, {
-                    latitude: 51.515,
-                    longitude: -0.111,
-                    fillKey: "MAJOR",
-                    radius: 16.8,
-                    state: "Brasserie Blanc Chancery Lane",
-                    averageCLV: 168.0582380198,
-                    loyalCustomerPercentage: 2.9,
-                    averageLoyalCLV: 454.7517361531,
-                    numberOfNewCustomer: 7747,
-                    numberOfRepeatCustomer: 752,
-                    revenueFromRepeatCustomer: 85944.1652494888
-                },
-                {
-                    latitude: 51.897,
-                    longitude: -2.08,
-                    fillKey: "MAJOR",
-                    radius: 16.1,
-                    state: "Brasserie Blanc Cheltenham",
-                    averageCLV: 161.574320436,
-                    loyalCustomerPercentage: 6.9,
-                    averageLoyalCLV: 531.9651735054,
-                    numberOfNewCustomer: 17737,
-                    numberOfRepeatCustomer: 3634,
-                    revenueFromRepeatCustomer: 412922.2442942071
-                }, {
-                    latitude: 50.837,
-                    longitude: -0.773,
-                    fillKey: "MAJOR",
-                    radius: 14.9,
-                    state: "Brasserie Blanc Chichester",
-                    averageCLV: 149.6256622623,
-                    loyalCustomerPercentage: 8.3,
-                    averageLoyalCLV: 500.3795133438,
-                    numberOfNewCustomer: 11780,
-                    numberOfRepeatCustomer: 2615,
-                    revenueFromRepeatCustomer: 250062.3637639136
-                },
-                {
-                    latitude: 53.364,
-                    longitude: -2.297,
-                    fillKey: "MAJOR",
-                    radius: 10.9,
-                    state: "Brasserie Blanc Hale Barns",
-                    averageCLV: 109.0286658465,
-                    loyalCustomerPercentage: 1.7,
-                    averageLoyalCLV: 384.1930136535,
-                    numberOfNewCustomer: 3187,
-                    numberOfRepeatCustomer: 204,
-                    revenueFromRepeatCustomer: 19704.5595382306
-                },
-                {
-                    latitude: 53.305,
-                    longitude: -2.373,
-                    fillKey: "MAJOR",
-                    radius: 11.9,
-                    state: "Brasserie Blanc Knutsford",
-                    averageCLV: 119.8092815913,
-                    loyalCustomerPercentage: 2.2,
-                    averageLoyalCLV: 367.3702522087,
-                    numberOfNewCustomer: 2373,
-                    numberOfRepeatCustomer: 251,
-                    revenueFromRepeatCustomer: 24366.5191507937
-                },
-                {
-                    latitude: 53.793,
-                    longitude: -1.544,
-                    fillKey: "MAJOR",
-                    radius: 17.4,
-                    state: "Brasserie Blanc Leeds",
-                    averageCLV: 174.2581099538,
-                    loyalCustomerPercentage: 6.3,
-                    averageLoyalCLV: 561.718579833,
-                    numberOfNewCustomer: 11193,
-                    numberOfRepeatCustomer: 2293,
-                    revenueFromRepeatCustomer: 276408.3742539464
-                },
-                {
-                    latitude: 52.037,
-                    longitude: -0.762,
-                    fillKey: "MAJOR",
-                    radius: 16.9,
-                    state: "Brasserie Blanc Milton Keynes",
-                    averageCLV: 169.8258651944,
-                    loyalCustomerPercentage: 7.3,
-                    averageLoyalCLV: 557.5684564083,
-                    numberOfNewCustomer: 10601,
-                    numberOfRepeatCustomer: 2213,
-                    revenueFromRepeatCustomer: 244684.0662571595
-                },
-                {
-                    latitude: 51.761,
-                    longitude: -1.267,
-                    fillKey: "MAJOR",
-                    radius: 14.7,
-                    state: "Brasserie Blanc Oxford",
-                    averageCLV: 147.0490165991,
-                    loyalCustomerPercentage: 5.7,
-                    averageLoyalCLV: 493.16597343,
-                    numberOfNewCustomer: 14829,
-                    numberOfRepeatCustomer: 2492,
-                    revenueFromRepeatCustomer: 254651.0307673252
-                },
-                {
-                    latitude: 50.796,
-                    longitude: -1.103,
-                    fillKey: "MAJOR",
-                    radius: 15,
-                    state: "Brasserie Blanc Portsmouth",
-                    averageCLV: 150.9933095079,
-                    loyalCustomerPercentage: 5.7,
-                    averageLoyalCLV: 539.6193664167,
-                    numberOfNewCustomer: 11751,
-                    numberOfRepeatCustomer: 2008,
-                    revenueFromRepeatCustomer: 218991.9674908291
-                },
-                {
-                    latitude: 51.506,
-                    longitude: -0.114,
-                    fillKey: "MAJOR",
-                    radius: 14.2,
-                    state: "Brasserie Blanc Southbank",
-                    averageCLV: 142.8088382391,
-                    loyalCustomerPercentage: 3.3,
-                    averageLoyalCLV: 446.5799095031,
-                    numberOfNewCustomer: 19773,
-                    numberOfRepeatCustomer: 2144,
-                    revenueFromRepeatCustomer: 225476.4713801958
-                },
-                {
-                    latitude: 51.514,
-                    longitude: -0.086,
-                    fillKey: "MAJOR",
-                    radius: 16.4,
-                    state: "Brasserie Blanc Threadneedle Street",
-                    averageCLV: 164.1310464348,
-                    loyalCustomerPercentage: 2.7,
-                    averageLoyalCLV: 443.3878546318,
-                    numberOfNewCustomer: 9077,
-                    numberOfRepeatCustomer: 978,
-                    revenueFromRepeatCustomer: 109083.4575950562
-                },
-                {
-                    latitude: 51.512,
-                    longitude: -0.071,
-                    fillKey: "MAJOR",
-                    radius: 15.3,
-                    state: "Brasserie Blanc Tower of London",
-                    averageCLV: 153.5648650061,
-                    loyalCustomerPercentage: 0.5,
-                    averageLoyalCLV: 513.9913163763,
-                    numberOfNewCustomer: 2983,
-                    numberOfRepeatCustomer: 132,
-                    revenueFromRepeatCustomer: 20111.8658333333
-                },
-                {
-                    latitude: 51.065,
-                    longitude: -1.315,
-                    fillKey: "MAJOR",
-                    radius: 14.8,
-                    state: "Brasserie Blanc Winchester",
-                    averageCLV: 148.6051824018,
-                    loyalCustomerPercentage: 5.3,
-                    averageLoyalCLV: 487.301485731,
-                    numberOfNewCustomer: 15003,
-                    numberOfRepeatCustomer: 2501,
-                    revenueFromRepeatCustomer: 266006.140169428
-                },
-                {
-                    latitude: 51.488,
-                    longitude: -0.226,
-                    fillKey: "MAJOR",
-                    radius: 16.4,
-                    state: "Fulham Reach",
-                    averageCLV: 164.729488126,
-                    loyalCustomerPercentage: 5.1,
-                    averageLoyalCLV: 559.4775652867,
-                    numberOfNewCustomer: 7168,
-                    numberOfRepeatCustomer: 1149,
-                    revenueFromRepeatCustomer: 139296.0574129191
-                },
-                {
-                    latitude: 51.237,
-                    longitude: -0.206,
-                    fillKey: "MAJOR",
-                    radius: 15.9,
-                    state: "Reigate",
-                    averageCLV: 159.4333708048,
-                    loyalCustomerPercentage: 8.2,
-                    averageLoyalCLV: 493.9643376789,
-                    numberOfNewCustomer: 10235,
-                    numberOfRepeatCustomer: 2532,
-                    revenueFromRepeatCustomer: 268076.7322610299
-                },
-                {
-                    latitude: 51.244,
-                    longitude: -0.005,
-                    fillKey: "MAJOR",
-                    radius: 15.5,
-                    state: "The Barley Mow",
-                    averageCLV: 155.9241790531,
-                    loyalCustomerPercentage: 9,
-                    averageLoyalCLV: 528.7829748803,
-                    numberOfNewCustomer: 9169,
-                    numberOfRepeatCustomer: 2307,
-                    revenueFromRepeatCustomer: 235017.3400581832
-                },
-                {
-                    latitude: 51.747,
-                    longitude: -0.977,
-                    fillKey: "MAJOR",
-                    radius: 17.7,
-                    state: "The Black Horse - Thame",
-                    averageCLV: 177.8144111618,
-                    loyalCustomerPercentage: 10.6,
-                    averageLoyalCLV: 535.9106101842,
-                    numberOfNewCustomer: 15387,
-                    numberOfRepeatCustomer: 4549,
-                    revenueFromRepeatCustomer: 499212.8739177917
-                },
-                {
-                    latitude: 51.97,
-                    longitude: -0.855,
-                    fillKey: "MAJOR",
-                    radius: 16.9,
-                    state: "The Boot",
-                    averageCLV: 169.9054980849,
-                    loyalCustomerPercentage: 11.3,
-                    averageLoyalCLV: 517.1817135269,
-                    numberOfNewCustomer: 12737,
-                    numberOfRepeatCustomer: 4171,
-                    revenueFromRepeatCustomer: 425112.2509207239
-                },
-                {
-                    latitude: 52.131,
-                    longitude: 0.246,
-                    fillKey: "MAJOR",
-                    radius: 18.0,
-                    state: "The British Queen",
-                    averageCLV: 180.2180242046,
-                    loyalCustomerPercentage: 7.6,
-                    averageLoyalCLV: 568.3569254011,
-                    numberOfNewCustomer: 4449,
-                    numberOfRepeatCustomer: 1076,
-                    revenueFromRepeatCustomer: 125838.306067513
-                },
-                {
-                    latitude: 51.03,
-                    longitude: -0.958,
-                    fillKey: "MAJOR",
-                    radius: 14.0,
-                    state: "The Cricketers",
-                    averageCLV: 140.4249406306,
-                    loyalCustomerPercentage: 7.6,
-                    averageLoyalCLV: 454.645760936,
-                    numberOfNewCustomer: 13323,
-                    numberOfRepeatCustomer: 3084,
-                    revenueFromRepeatCustomer: 296301.2528063028
-                },
-                {
-                    latitude: 51.778,
-                    longitude: 0.382,
-                    fillKey: "MAJOR",
-                    radius: 17.6,
-                    state: "The Hare",
-                    averageCLV: 176.9136373072,
-                    loyalCustomerPercentage: 11.1,
-                    averageLoyalCLV: 521.0249153503,
-                    numberOfNewCustomer: 8780,
-                    numberOfRepeatCustomer: 2977,
-                    revenueFromRepeatCustomer: 312597.0877212432
-                },
-                {
-                    latitude: 52.238,
-                    longitude: -0.156,
-                    fillKey: "MAJOR",
-                    radius: 16.3,
-                    state: "The Highwayman",
-                    averageCLV: 163.2377065389,
-                    loyalCustomerPercentage: 8.8,
-                    averageLoyalCLV: 518.9623973134,
-                    numberOfNewCustomer: 9400,
-                    numberOfRepeatCustomer: 2581,
-                    revenueFromRepeatCustomer: 273558.9591048814
-                },
-                {
-                    latitude: 51.558,
-                    longitude: 0.274,
-                    fillKey: "MAJOR",
-                    radius: 19.1,
-                    state: "The Jobber's Rest",
-                    averageCLV: 191.8113921078,
-                    loyalCustomerPercentage: 13.7,
-                    averageLoyalCLV: 570.3118335427,
-                    numberOfNewCustomer: 10806,
-                    numberOfRepeatCustomer: 4158,
-                    revenueFromRepeatCustomer: 441825.8619952538
-                },
-                {
-                    latitude: 51.655,
-                    longitude: -0.107,
-                    fillKey: "MAJOR",
-                    radius: 18.1,
-                    state: "The Jolly Farmer",
-                    averageCLV: 181.6103169303,
-                    loyalCustomerPercentage: 12.5,
-                    averageLoyalCLV: 532.961324072,
-                    numberOfNewCustomer: 5816,
-                    numberOfRepeatCustomer: 2080,
-                    revenueFromRepeatCustomer: 215648.8655953375
-                },
-                {
-                    latitude: 51.807,
-                    longitude: -0.492,
-                    fillKey: "MAJOR",
-                    radius: 16.1,
-                    state: "The King's Arms",
-                    averageCLV: 161.6258927515,
-                    loyalCustomerPercentage: 9.7,
-                    averageLoyalCLV: 498.4368814273,
-                    numberOfNewCustomer: 8658,
-                    numberOfRepeatCustomer: 2538,
-                    revenueFromRepeatCustomer: 259201.022860938
-                },
-                {
-                    latitude: 51.47,
-                    longitude: -0.521,
-                    fillKey: "MAJOR",
-                    radius: 18.7,
-                    state: "The Kings Head",
-                    averageCLV: 187.6627585819,
-                    loyalCustomerPercentage: 11.4,
-                    averageLoyalCLV: 554.1282592004,
-                    numberOfNewCustomer: 11642,
-                    numberOfRepeatCustomer: 3920,
-                    revenueFromRepeatCustomer: 439083.5442009325
-                },
-                {
-                    latitude: 51.278,
-                    longitude: -0.511,
-                    fillKey: "MAJOR",
-                    radius: 15.8,
-                    state: "The March Hare",
-                    averageCLV: 158.6843060387,
-                    loyalCustomerPercentage: 7.4,
-                    averageLoyalCLV: 484.8912866803,
-                    numberOfNewCustomer: 17338,
-                    numberOfRepeatCustomer: 4162,
-                    revenueFromRepeatCustomer: 453726.1788376899
-                },
-                {
-                    latitude: 51.67,
-                    longitude: -0.497,
-                    fillKey: "MAJOR",
-                    radius: 15.4,
-                    state: "The Oaks",
-                    averageCLV: 154.0882334028,
-                    loyalCustomerPercentage: 9.1,
-                    averageLoyalCLV: 525.0498652461,
-                    numberOfNewCustomer: 14740,
-                    numberOfRepeatCustomer: 3721,
-                    revenueFromRepeatCustomer: 375815.6581382698
-                },
-                {
-                    latitude: 51.429,
-                    longitude: -0.935,
-                    fillKey: "MAJOR",
-                    radius: 13.7,
-                    state: "The Oakwood",
-                    averageCLV: 137.7764401102,
-                    loyalCustomerPercentage: 3,
-                    averageLoyalCLV: 393.0892136484,
-                    numberOfNewCustomer: 2062,
-                    numberOfRepeatCustomer: 230,
-                    revenueFromRepeatCustomer: 28099.9873102453
-                },
-                {
-                    latitude: 51.385,
-                    longitude: -0.56,
-                    fillKey: "MAJOR",
-                    radius: 16.9,
-                    state: "The Queens Head",
-                    averageCLV: 169.1449902345,
-                    loyalCustomerPercentage: 9,
-                    averageLoyalCLV: 543.4618230344,
-                    numberOfNewCustomer: 10735,
-                    numberOfRepeatCustomer: 2863,
-                    revenueFromRepeatCustomer: 318708.7250417958
-                },
-                {
-                    latitude: 51.063,
-                    longitude: -0.326,
-                    fillKey: "MAJOR",
-                    radius: 15.9,
-                    state: "The Red Deer",
-                    averageCLV: 159.7972219423,
-                    loyalCustomerPercentage: 7.7,
-                    averageLoyalCLV: 476.7726360475,
-                    numberOfNewCustomer: 10151,
-                    numberOfRepeatCustomer: 2575,
-                    revenueFromRepeatCustomer: 274943.3153444236
-                },
-                {
-                    latitude: 51.372,
-                    longitude: -0.468,
-                    fillKey: "MAJOR",
-                    radius: 16.4,
-                    state: "The Sun Inn",
-                    averageCLV: 164.5675241293,
-                    loyalCustomerPercentage: 11.1,
-                    averageLoyalCLV: 525.8164882575,
-                    numberOfNewCustomer: 11303,
-                    numberOfRepeatCustomer: 3624,
-                    revenueFromRepeatCustomer: 365301.4708195629
-                }, {
-                    latitude: 51.507,
-                    longitude: -0.945,
-                    fillKey: "MAJOR",
-                    radius: 17.6,
-                    state: "The Victoria",
-                    averageCLV: 176.0501315359,
-                    loyalCustomerPercentage: 4.5,
-                    averageLoyalCLV: 610.831286979,
-                    numberOfNewCustomer: 1550,
-                    numberOfRepeatCustomer: 214,
-                    revenueFromRepeatCustomer: 30647.7875634921
-                },
-                {
-                    latitude: 51.546,
-                    longitude: -0.025,
-                    fillKey: "MAJOR",
-                    radius: 17.6,
-                    state: "The White Bear",
-                    averageCLV: 176.1977209691,
-                    loyalCustomerPercentage: 13.1,
-                    averageLoyalCLV: 491.7146728667,
-                    numberOfNewCustomer: 8848,
-                    numberOfRepeatCustomer: 3342,
-                    revenueFromRepeatCustomer: 329375.7270054448
-                }
-            ]
             
             // // ISO ID code for city or <state></state>
-            setTimeout(() => { // only start drawing bubbles on the map when map has rendered completely.
-                bubble_map.bubbles(bubbles, {
-                    popupTemplate: function (geo, data) {
-
-                        return `<div class="hoverinfo">Restaurant: ${data.state}<br/> Average CLV: ${data.averageCLV}<br/> Average Loyal CLV: ${data.averageLoyalCLV}<br/> Percentage of Loyal Customer : ${data.loyalCustomerPercentage}%<br/> Number of New Customer: ${data.numberOfNewCustomer}<br/> Number of Repeat Customer: ${data.numberOfRepeatCustomer}<br/> Revenue From Repeat Customer: ${data.revenueFromRepeatCustomer}<br/> </div>`;
-                    }
-                });
-            }, 1000);
+            
         }
 
+        function change_map_data(toggle_param)
+        {
+            if(toggle_param === "clv")
+            {
+                bubble_map.bubbles(bubbles_clv, {
+                    popupTemplate: function (geo, data) {
+
+                        return `<div class="hoverinfo"><b>Restaurant</b>: ${data.state}<br/> <b>Average CLV</b>: ${data.averageCLV}<br/> <b>Average Loyal CLV</b>: ${data.averageLoyalCLV}<br/> <b>Percentage of Loyal Customer </b>: ${data.loyalCustomerPercentage}%<br/> <b>Number of New Customer</b>: ${data.numberOfNewCustomer}<br/> <b>Number of Repeat Customer</b>: ${data.numberOfRepeatCustomer}<br/> <b>Revenue From Repeat Customer</b>: ${data.revenueFromRepeatCustomer}<br/> </div>`;
+                    }
+                });
+            }
+            else
+            {
+                bubble_map.bubbles(bubbles_revenue, {
+                    popupTemplate: function (geo, data) {
+
+                        return `<div class="hoverinfo"><b>Restaurant</b>: ${data.state}<br/> <b>Average CLV</b>: ${data.averageCLV}<br/> <b>Average Loyal CLV</b>: ${data.averageLoyalCLV}<br/> <b>Percentage of Loyal Customer </b>: ${data.loyalCustomerPercentage}%<br/> <b>Number of New Customer</b>: ${data.numberOfNewCustomer}<br/> <b>Number of Repeat Customer</b>: ${data.numberOfRepeatCustomer}<br/> <b>Revenue From Repeat Customer</b>: ${data.revenueFromRepeatCustomer}<br/> </div>`;
+                    }
+                });
+            }
+            
+        }
     </script>
 </head>
 
@@ -1254,7 +1746,7 @@
 
             </div>
             <form class="d-flex">
-               <a><i class="fa fa-user text-primary" aria-hidden="true"></i></a> 
+                <a><i class="fa fa-user text-primary" aria-hidden="true"></i></a>
             </form>
         </div>
     </nav>
@@ -1269,8 +1761,8 @@
                                     <div class="row">
                                         <div class="col-md-8">
                                             <h6 class="card-title text-primary">Customer Segmentations <label
-                                                    id="restaurant_name" ></label> <label
-                                                    id="cs_selectionDate" class="text-info">( 01-08-2019 -
+                                                    id="restaurant_name"></label> <label id="cs_selectionDate"
+                                                    class="text-info">( 01-08-2019 -
                                                     28-02-2022 )</label> </h6>
                                         </div>
                                         <div class="col-md-4">
@@ -1280,7 +1772,7 @@
                                         </div>
                                     </div>
                                     <hr>
-                                    <table class="table table-bordered table-responsive" id="customer_segmantation" >
+                                    <table class="table table-bordered table-responsive" id="customer_segmantation">
                                         <tbody>
                                             <tr>
                                                 <th class="col-3 bg-secondary"></th>
@@ -1351,10 +1843,13 @@
                                                 <td id="risk_rev"></td>
                                             </tr>
                                             <tr>
-                                                <td class="text-primary">Churned Customers<p><label class="text-secondary" >Customer who have not
-                                                        made a Purchase in 2x</label><br/><label class="text-secondary">
-                                                        the average number of days
-                                                        between orders</label></p></td>
+                                                <td class="text-primary">Churned Customers<p><label
+                                                            class="text-secondary">Customer who have not
+                                                            made a Purchase in 2x</label><br /><label
+                                                            class="text-secondary">
+                                                            the average number of days
+                                                            between orders</label></p>
+                                                </td>
                                                 <td id="churn_users"></td>
                                                 <td id="churn_freq"></td>
                                                 <td id="churn_aov"></td>
@@ -1372,14 +1867,14 @@
                             <div class="card h-100">
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-8">
+                                        <div class="col-md-10">
                                             <h6 class="card-title text-primary">Customer Life Time Prediction Vs Actual
-                                                OverTime  <label class="text-info" id="ca_fromToDate">( 01-05-2021 -
+                                                OverTime <label class="text-info" id="ca_fromToDate">( 01-05-2021 -
                                                     30-05-2022 )</label>
                                             </h6>
 
                                         </div>
-                                        <div class="col-md-2 offset-md-2">
+                                        <div class="col-md-2 ">
                                             <button id="test" class="btn btn-success btn-sm"> Reset </button>
                                         </div>
                                     </div>
@@ -1390,43 +1885,50 @@
                         </div>
                     </div>
                     <div class="row mt-3 mb-3">
-                        <div class="col-lg-4">
+                        <div class="col-lg-6">
                             <div class="card h-100">
                                 <div class="card-body">
                                     <h6 class="card-title text-primary">Location Based Analysis</h6>
                                     <hr>
+                                    <div id="uk" style="height: 950px; width: 800px;position: relative;"></div>
+                                    <br>
+                                    <div class="container">
+                                        
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="btn-group">
+                                                    <input type="radio" class="btn-check" name="options" id="rb_clv_avg" onclick="change_map_data('clv');"  autocomplete="off" checked>
+                                                    <label class="btn btn-outline-primary" for="rb_clv_avg" >AVG. CLV (€)</label>
 
-                                    <div id="uk" style="height: 350px; width: 600px; position: relative;"></div>
+                                                    <input type="radio" class="btn-check" name="options" id="rb_revenue" onclick="change_map_data('revenue');"   autocomplete="off" >
+                                                    <label class="btn btn-outline-primary" for="rb_revenue" >Total Revenue (€)</label>
+                                                </div>
+                                            </div>                                            
+                                        </div>                                        
+                                    </div>                        
                                 </div>
-
                             </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-6">
                             <div class="card h-100">
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-sm-5 col-md-6">
+                                        <div class="col-md-8">
                                             <h6 class="card-title text-primary">Age Based Analysis</h6>
                                         </div>
-                                        <div class="col-sm-5 offset-sm-2 col-md-6 offset-md-0">
+                                        <div class="col-md-4">
                                             <select id="age_location_list" onchange="location_based_age_graph();"
                                                 data-max-options="5" data-live-search="true"></select>
                                         </div>
                                     </div>
                                     <hr>
                                     <canvas class="chart" width="400" height="200"></canvas>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="card h-100">
-                                <div class="card-body">
+                                    <hr>
                                     <div class="row">
-                                        <div class="col-sm-5 col-md-6">
+                                        <div class="col-md  -8">
                                             <h6 class="card-title text-primary">Revenue Distribution Over Time</h6>
                                         </div>
-                                        <div class="col-sm-5 offset-sm-2 col-md-6 offset-md-0">
+                                        <div class="col-md-4">
                                             <select id="revenue_location_list"
                                                 onchange="location_based_revenue_graph();" data-max-options="5"
                                                 data-live-search="true"></select>
@@ -1437,7 +1939,10 @@
                                 </div>
 
                             </div>
+
+
                         </div>
+
                     </div>
                 </div>
             </main>
@@ -1469,110 +1974,96 @@
                                 <div>
 
                                 </div>
-                                <div class="card-group">
-
-
-                                    <div class="card" >
-                                        <div class="card-body">
-                                            <select class="form-select" id="selectpicker"
-                                                aria-label="Default select example">
-                                                <option selected="selected" value="green">Standard</option>
-                                                <option value="blue">Customised</option>
-                                            </select>
-                                            <br>
-                                            <div class="green box">
-                                                <div class="row">
-                                                    <div class="col-lg-6">
-                                                        <select class="selectpicker2 border rounded" id="year_list"
-                                                            data-live-search="true" data-width="100%">
-                                                            <option value="">Year</option>
-                                                            <option value="2015">2015</option>
-                                                            <option value="2016">2016</option>
-                                                            <option value="2017">2017</option>
-                                                            <option value="2018">2018</option>
-                                                            <option value="2019">2019</option>
-                                                            <option value="2020">2020</option>
-                                                            <option value="2021" selected>2021</option>
-                                                            <option value="2022">2022</option>
-                                                            <option value="2023">2023</option>
-                                                            <option value="2024">2024</option>
-                                                            <option value="2025">2025</option>
-                                                            <option value="2026">2026</option>
-                                                            <option value="2027">2027</option>
-                                                            <option value="2028">2028</option>
-                                                            <option value="2029">2029</option>
-                                                            <option value="2030">2030</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-6">
-                                                        <select class="selectpicker1 border rounded" id="month_list"
-                                                            data-live-search="true" data-width="100%">
-                                                            <option value="">Month</option>
-                                                            <option value="1">January</option>
-                                                            <option value="2">February</option>
-                                                            <option value="3">March</option>
-                                                            <option value="4">April</option>
-                                                            <option value="5">May</option>
-                                                            <option value="6">June</option>
-                                                            <option value="7">July</option>
-                                                            <option value="8">August</option>
-                                                            <option value="9">September</option>
-                                                            <option value="10">October</option>
-                                                            <option value="11">November</option>
-                                                            <option value="12">December</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            <div class="blue box">
-                                                <div class="input-group mb-3">
-                                                    <span class="input-group-text">From</span>
-                                                    <input type="date" id="from_date" class="form-control">
-                                                    <span class="input-group-text">To</span>
-                                                    <input type="date" id="to_date" class="form-control">
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="card">
-                                        <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <select class="form-select" id="selectpicker"
+                                            aria-label="Default select example">
+                                            <option selected="selected" value="green">Standard</option>
+                                            <option value="blue">Customised</option>
+                                        </select>
+                                        <br>
+                                        <div class="green box">
                                             <div class="row">
-                                                <div class="col-lg-10">
-                                                    <h5 className="text-secondary">Location <span><i
-                                                                class="fa fa-filter" aria-hidden="true"></i></span></h5>
-                                                </div>                                                
+                                                <div class="col-lg-6">
+                                                    <select class="selectpicker2 border rounded" id="year_list"
+                                                        data-live-search="true" data-width="100%">
+                                                        <option value="">Year</option>
+                                                        <option value="2015">2015</option>
+                                                        <option value="2016">2016</option>
+                                                        <option value="2017">2017</option>
+                                                        <option value="2018">2018</option>
+                                                        <option value="2019">2019</option>
+                                                        <option value="2020">2020</option>
+                                                        <option value="2021" selected>2021</option>
+                                                        <option value="2022">2022</option>
+                                                        <option value="2023">2023</option>
+                                                        <option value="2024">2024</option>
+                                                        <option value="2025">2025</option>
+                                                        <option value="2026">2026</option>
+                                                        <option value="2027">2027</option>
+                                                        <option value="2028">2028</option>
+                                                        <option value="2029">2029</option>
+                                                        <option value="2030">2030</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <select class="selectpicker1 border rounded" id="month_list"
+                                                        data-live-search="true" data-width="100%">
+                                                        <option value="">Month</option>
+                                                        <option value="1">January</option>
+                                                        <option value="2">February</option>
+                                                        <option value="3">March</option>
+                                                        <option value="4">April</option>
+                                                        <option value="5">May</option>
+                                                        <option value="6">June</option>
+                                                        <option value="7">July</option>
+                                                        <option value="8">August</option>
+                                                        <option value="9">September</option>
+                                                        <option value="10">October</option>
+                                                        <option value="11">November</option>
+                                                        <option value="12">December</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <br>
-                                            <select id="excutive_summary_list" class="border rounded"
-                                                data-live-search="true" data-width="100%">
-                                            </select>
+
                                         </div>
-                                    </div>                                    
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="row">                                                
-                                                <div class="col-md-6">&nbsp;</div>
+                                        <div class="blue box">
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text">From</span>
+                                                <input type="date" id="from_date" class="form-control">
+                                                <span class="input-group-text">To</span>
+                                                <input type="date" id="to_date" class="form-control">
                                             </div>
-                                            <div class="row">                                                
-                                                <div class="col-md-4">&nbsp;</div>
-                                                <div class="col-md-2 "><button class="btn btn-success btn-lg"
-                                                        onclick="location_based_excutive_summary();">GO</button></div>
-                                            </div>                                                                                        
                                         </div>
                                     </div>
+                                    <div class="col-md-5">
 
+                                        <div class="row">
+                                            <div class="col-lg-10">
+                                                <h5 className="text-secondary">Location <span><i class="fa fa-filter"
+                                                            aria-hidden="true"></i></span></h5>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <select id="excutive_summary_list" class="border rounded"
+                                            data-live-search="true" data-width="100%">
+                                        </select>
 
+                                    </div>
+                                    <div class="col-md-2">
 
-
-
-
-
-
-
+                                        <div class="row">
+                                            <div class="col-md-6">&nbsp;</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">&nbsp;</div>
+                                            <div class="col-md-2 "><button class="btn btn-success btn-lg"
+                                                    onclick="location_based_excutive_summary();">GO</button></div>
+                                        </div>
+                                    </div>
 
                                 </div>
+                                <hr>
                                 <table class="table table-bordered table-responsive" id="executive_summary" width="100">
                                     <tbody>
                                         <tr>
