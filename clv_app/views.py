@@ -47,26 +47,7 @@ def get_time_series_data(request):
 
         #future forecast start & end time
         ts_prediction_start = '2021-05-01'
-        ts_prediction_end = '2022-05-30'
-
-
-        #executive summary filter from date & to date
-        act_start = ''#'2022-01-01 00:00:00'
-        act_end = ''#'2022-04-30 00:00:00'
-        year = 2021
-        month = 0
-        custom_filter = True
-        is_filter = False
-        print("*****************************************************************************************")
-        print(act_start)
-        print(act_end)
-        print("*****************************************************************************************")
-        prev_act_start = ''#'2021-01-01 00:00:00'
-        prev_act_end = ''#'2021-04-30 00:00:00'
-        prev_year = 0
-        prev_month = 0
-        prev_clv_not_found = False
-        
+        ts_prediction_end = '2022-05-30'                       
 
         settings.TRANSACTION_DATAFRAME = trans_df.copy()
         #thersold date
@@ -516,78 +497,128 @@ def get_time_series_data(request):
         #Executive Summary Report
 
         #one time execution
-        prediction_summary_clv = prediction_clv.copy()
+        prediction_summary_clv_tmp = prediction_clv.copy()
+
         thersold = thersold_date.split("-")
         thersold_yr = int(thersold[0])
         thersold_mnth = int(thersold[1])
         thersold_day = int(thersold[2])
         a_date = datetime.date(thersold_yr, thersold_mnth, thersold_day)
-        prediction_summary_clv['thersold_day'] = a_date
-        prediction_summary_clv['customer_age_days'] = pd.to_timedelta(prediction_summary_clv['customer_age'], unit='D')
-        prediction_summary_clv['OrderDate'] = prediction_summary_clv['thersold_day'] - prediction_summary_clv['customer_age_days']
-        prediction_summary_clv.drop(['thersold_day'],axis=1,inplace=True)
-        prediction_summary_clv.drop(['customer_age_days'],axis=1,inplace=True)
-        prediction_summary_clv_prev = prediction_summary_clv.copy()
+        prediction_summary_clv_tmp['thersold_day'] = a_date
+        prediction_summary_clv_tmp['customer_age_days'] = pd.to_timedelta(prediction_summary_clv_tmp['customer_age'], unit='D')
+        prediction_summary_clv_tmp['OrderDate'] = prediction_summary_clv_tmp['thersold_day'] - prediction_summary_clv_tmp['customer_age_days']
+        prediction_summary_clv_tmp.drop(['thersold_day'],axis=1,inplace=True)
+        prediction_summary_clv_tmp.drop(['customer_age_days'],axis=1,inplace=True)
+        prediction_summary_clv_tmp['OrderDate'] = pd.to_datetime(prediction_summary_clv_tmp['OrderDate'])
+        # extract date, month and year from dates
+        prediction_summary_clv_tmp['Month'] = [i.month for i in prediction_summary_clv_tmp['OrderDate']]
+        prediction_summary_clv_tmp['Year'] = [i.year for i in prediction_summary_clv_tmp['OrderDate']]
+        prediction_summary_clv_tmp['day_of_week'] = [i.dayofweek for i in prediction_summary_clv_tmp['OrderDate']]
+        prediction_summary_clv_tmp['day_of_year'] = [i.dayofyear for i in prediction_summary_clv_tmp['OrderDate']]
+        prediction_summary_clv_tmp['OrderDate'] = prediction_summary_clv_tmp['OrderDate'].dt.date
 
-        if(len(act_start.strip())):
-            startDate = pd.to_datetime(act_start).date()
-            startDate_tmp = pd.to_datetime(act_start).date()
-            prev_start = str(startDate_tmp - pd.DateOffset(years=1))
-            prev_start = pd.to_datetime(prev_start).date()
-            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] < startDate].index, inplace = True)
-            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] < prev_start].index, inplace = True)
+        
+        settings.EXECUTIVE_SUMMARY_DATAFRAME = prediction_summary_clv_tmp.copy()
+        
+
+        
+        print("Dataframe initialization process completed... ")
+        settings.MODEL_LOAD_FLAG = "True"
+                        
             
-            if(len(act_end.strip())):
-                endDate = pd.to_datetime(act_end).date()
-                endDate_tmp = pd.to_datetime(act_end).date()
-                prev_end = str(endDate_tmp - pd.DateOffset(years=1))
-                prev_end = pd.to_datetime(prev_end).date()
-                prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] > endDate].index, inplace = True)
-                prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] > prev_end].index, inplace = True)
-                is_filter = True
-            else:
-                custom_filter = False
+    
+    result = {}
+    result["prediction_graph"] = settings.PREDICTION_GRAPH_DATA
+    age_analytics_df = settings.ANALYTICS_GRAPH_DATAFRAME.copy()
+    revenue_df = settings.REVENUE_GRAPH_DATAFRAME.copy()
+
+    all_customer_df = settings.ALL_CUSTOMER_DATAFRAME.copy()
+    loyal_customer_df = settings.LOYAL_CUSTOMER_DATAFRAME.copy()
+    repeat_customer_df = settings.REPEAT_CUSTOMER_DATAFRAME.copy()
+    top_customer_df = settings.TOP_SPENDER_DATAFRAME.copy()
+    low_customer_df = settings.LOW_SPENDER_DATAFRAME.copy()
+    risk_customer_df = settings.RISK_CUSTOMER_DATAFRAME.copy()
+    chrun_customer_df = settings.CHURN_CUSTOMER_DATAFRAME.copy()
+    
+    location_name = "The Sun Inn"
+    summary_location = "The Sun Inn"
+
+    #every time process
+
+    #executive summary filter from date & to date
+    act_start = ''#'2022-01-01 00:00:00'
+    act_end = ''#'2022-04-30 00:00:00'
+    year = 2021
+    month = 0
+    custom_filter = True
+    
+    print("*****************************************************************************************")
+    print(act_start)
+    print(act_end)
+    print(summary_location)
+    print("*****************************************************************************************")
+    
+    prev_year = 0
+    prev_month = 0
+    prev_clv_not_found = False
+    cur_clv_not_found = False
+
+    prediction_summary_clv_prev = settings.EXECUTIVE_SUMMARY_DATAFRAME.copy()
+    prediction_summary_clv = settings.EXECUTIVE_SUMMARY_DATAFRAME.copy()
+
+
+    if(len(act_start.strip())):
+        startDate = pd.to_datetime(act_start).date()
+        startDate_tmp = pd.to_datetime(act_start).date()
+        prev_start = str(startDate_tmp - pd.DateOffset(years=1))
+        prev_start = pd.to_datetime(prev_start).date()
+        prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] < startDate].index, inplace = True)
+        prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] < prev_start].index, inplace = True)
+        custom_filter = True
+        
+        if(len(act_end.strip())):
+            endDate = pd.to_datetime(act_end).date()
+            endDate_tmp = pd.to_datetime(act_end).date()
+            prev_end = str(endDate_tmp - pd.DateOffset(years=1))
+            prev_end = pd.to_datetime(prev_end).date()
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] > endDate].index, inplace = True)
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] > prev_end].index, inplace = True)        
         else:
             custom_filter = False
+    else:
+        custom_filter = False
+
+
+    if not custom_filter:    
+        if(year > 0 and month == 0):
+            prev_year = year - 1
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Year'] != year].index, inplace = True)  
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Year'] != prev_year].index, inplace = True)        
             
-
-        prediction_summary_clv['OrderDate'] = pd.to_datetime(prediction_summary_clv['OrderDate'])
-
-        # extract date, month and year from dates
-        prediction_summary_clv['Month'] = [i.month for i in prediction_summary_clv['OrderDate']]
-        prediction_summary_clv['Year'] = [i.year for i in prediction_summary_clv['OrderDate']]
-        prediction_summary_clv['day_of_week'] = [i.dayofweek for i in prediction_summary_clv['OrderDate']]
-        prediction_summary_clv['day_of_year'] = [i.dayofyear for i in prediction_summary_clv['OrderDate']]
-
-        r, c = prediction_summary_clv_prev.shape
-        if r > 0 :
-            prediction_summary_clv_prev['OrderDate'] = pd.to_datetime(prediction_summary_clv_prev['OrderDate'])
-
-            # extract date, month and year from dates
-            prediction_summary_clv_prev['Month'] = [i.month for i in prediction_summary_clv_prev['OrderDate']]
-            prediction_summary_clv_prev['Year'] = [i.year for i in prediction_summary_clv_prev['OrderDate']]
-            prediction_summary_clv_prev['day_of_week'] = [i.dayofweek for i in prediction_summary_clv_prev['OrderDate']]
-            prediction_summary_clv_prev['day_of_year'] = [i.dayofyear for i in prediction_summary_clv_prev['OrderDate']]
-        else:
-            prev_clv_not_found = True  
-            
-        if not custom_filter:
-            if(year > 0):
+        if(year > 0 and month > 0):
+            if(month == 1):
+                prev_month = 12
                 prev_year = year - 1
-                prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Year'] != year].index, inplace = True)  
-                prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Year'] != prev_year].index, inplace = True)        
-                is_filter = True
+            else:                
+                prev_year = year
+                prev_month = month - 1
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Year'] != year].index, inplace = True)  
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Year'] != prev_year].index, inplace = True)    
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Month'] != month].index, inplace = True)
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Month'] != prev_month].index, inplace = True)        
                 
-                if(month > 0):
-                    prev_month = month - 1
-                    prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Month'] != month].index, inplace = True)
-                    prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Month'] != prev_month].index, inplace = True)        
-                    is_filter = True
-                    
-        r, c = prediction_summary_clv_prev.shape
-        if r == 0 :
-            prev_clv_not_found = True
+                
+    r, c = prediction_summary_clv_prev.shape
+    if r == 0 :
+        prev_clv_not_found = True
+        
+    r, c = prediction_summary_clv.shape
+    if r == 0 :
+        cur_clv_not_found = True
 
+
+
+    if not cur_clv_not_found:
         #location based avg CLV of All customer
         prediction_summary_all_clv = prediction_summary_clv.groupby(['Location']).agg({"no_visit" : np.sum, "CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
 
@@ -646,153 +677,136 @@ def get_time_series_data(request):
         executive_summary_df['TOTAL_USERS'] = executive_summary_df['TOTAL_USERS'] - executive_summary_df['CHURN_USERS']
 
         executive_summary_df_final = executive_summary_df[['Location','Total_NO_ORDERS','AVG_REVENUE_ALL','AVG_CLV_ALL','TOTAL_REVENUE_ALL','TOTAL_USERS','REPEAT_USERS','NEW_USERS','CHURN_USERS']]
+    else:
+        executive_summary_df_final = prediction_summary_clv
 
+    if not prev_clv_not_found:
+        #location based avg CLV of All customer
+        prediction_all_clv_prev = prediction_summary_clv_prev.groupby(['Location']).agg({"no_visit" : np.sum, "CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
 
-        if not prev_clv_not_found:
-            #location based avg CLV of All customer
-            prediction_all_clv_prev = prediction_summary_clv_prev.groupby(['Location']).agg({"no_visit" : np.sum, "CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+        #add, rename and remove the column
+        prediction_all_clv_prev['Total_Transaction'] = round(prediction_all_clv_prev['Total_Transaction'],3)
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_ALL"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_ALL"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CtcID" : "TOTAL_USERS"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_ALL"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"no_visit" : "Total_NO_ORDERS"})
 
-            #add, rename and remove the column
-            prediction_all_clv_prev['Total_Transaction'] = round(prediction_all_clv_prev['Total_Transaction'],3)
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_ALL"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_ALL"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CtcID" : "TOTAL_USERS"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_ALL"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"no_visit" : "Total_NO_ORDERS"})
+        executive_summary_df_prev = prediction_all_clv_prev
 
-            executive_summary_df_prev = prediction_all_clv_prev
+        #Repeat Customer
+        prediction_repeat_clv_prev = prediction_summary_clv_prev.copy()
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.loc[(prediction_repeat_clv_prev.no_visit >= 2)]
+        prediction_repeat_clv_prev['Total_Transaction'] = prediction_repeat_clv_prev['Transactional Value']
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+        prediction_repeat_clv_prev['Total_Transaction'] = round(prediction_repeat_clv_prev['Total_Transaction'],3)
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_REPEAT"})
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_REPEAT"})
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CtcID" : "REPEAT_USERS"})
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_REPEAT"})
 
-            #Repeat Customer
-            prediction_repeat_clv_prev = prediction_summary_clv_prev.copy()
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.loc[(prediction_repeat_clv_prev.no_visit >= 2)]
-            prediction_repeat_clv_prev['Total_Transaction'] = prediction_repeat_clv_prev['Transactional Value']
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
-            prediction_repeat_clv_prev['Total_Transaction'] = round(prediction_repeat_clv_prev['Total_Transaction'],3)
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_REPEAT"})
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_REPEAT"})
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CtcID" : "REPEAT_USERS"})
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_REPEAT"})
+        executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_repeat_clv_prev, on=["Location"])
 
-            executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_repeat_clv_prev, on=["Location"])
+        #New Customer
+        prediction_new_clv_prev = prediction_summary_clv_prev.copy()
+        prediction_new_clv_prev = prediction_new_clv_prev.loc[(prediction_new_clv_prev.no_visit == 1)]
+        prediction_new_clv_prev['Total_Transaction'] = prediction_new_clv_prev['Transactional Value']
+        prediction_new_clv_prev = prediction_new_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+        prediction_new_clv_prev['Total_Transaction'] = round(prediction_new_clv_prev['Total_Transaction'],3)
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_NEW"})
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_NEW"})
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CtcID" : "NEW_USERS"})
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_NEW"})
 
-            #New Customer
-            prediction_new_clv_prev = prediction_summary_clv_prev.copy()
-            prediction_new_clv_prev = prediction_new_clv_prev.loc[(prediction_new_clv_prev.no_visit == 1)]
-            prediction_new_clv_prev['Total_Transaction'] = prediction_new_clv_prev['Transactional Value']
-            prediction_new_clv_prev = prediction_new_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
-            prediction_new_clv_prev['Total_Transaction'] = round(prediction_new_clv_prev['Total_Transaction'],3)
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_NEW"})
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_NEW"})
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CtcID" : "NEW_USERS"})
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_NEW"})
+        executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_new_clv_prev, on=["Location"])
 
-            executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_new_clv_prev, on=["Location"])
+        #Churn Customer
+        prediction_churn_clv_prev = prediction_summary_clv_prev.copy()
+        prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.no_visit > 1)]
+        cus_total = prediction_churn_clv_prev['CtcID'].size
+        cus_avg_freq = round(prediction_churn_clv_prev['frequency'].sum()/cus_total,3)
+        prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.days_since_last_visit > (3 * cus_avg_freq))]
+        prediction_churn_clv_prev['Total_Transaction'] = prediction_churn_clv_prev['Transactional Value']
+        prediction_churn_clv_prev = prediction_churn_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+        prediction_churn_clv_prev['Total_Transaction'] = round(prediction_churn_clv_prev['Total_Transaction'],3)
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_CHURN"})
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_CHURN"})
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CtcID" : "CHURN_USERS"})
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_CHURN"})
 
-            #Churn Customer
-            prediction_churn_clv_prev = prediction_summary_clv_prev.copy()
-            prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.no_visit > 1)]
-            cus_total = prediction_churn_clv_prev['CtcID'].size
-            cus_avg_freq = round(prediction_churn_clv_prev['frequency'].sum()/cus_total,3)
-            prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.days_since_last_visit > (3 * cus_avg_freq))]
-            prediction_churn_clv_prev['Total_Transaction'] = prediction_churn_clv_prev['Transactional Value']
-            prediction_churn_clv_prev = prediction_churn_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
-            prediction_churn_clv_prev['Total_Transaction'] = round(prediction_churn_clv_prev['Total_Transaction'],3)
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_CHURN"})
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_CHURN"})
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CtcID" : "CHURN_USERS"})
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_CHURN"})
+        executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_churn_clv_prev, on=["Location"])
 
-            executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_churn_clv_prev, on=["Location"])
+        executive_summary_df_prev['TOTAL_USERS'] = executive_summary_df_prev['TOTAL_USERS'] - executive_summary_df_prev['CHURN_USERS']
 
-            executive_summary_df_prev['TOTAL_USERS'] = executive_summary_df_prev['TOTAL_USERS'] - executive_summary_df_prev['CHURN_USERS']
+        executive_summary_df_final_prev = executive_summary_df_prev[['Location','Total_NO_ORDERS','AVG_REVENUE_ALL','AVG_CLV_ALL','TOTAL_REVENUE_ALL','TOTAL_USERS','REPEAT_USERS','NEW_USERS','CHURN_USERS']]
+    else:
+        executive_summary_df_final_prev = prediction_summary_clv_prev
 
-            executive_summary_df_final_prev = executive_summary_df_prev[['Location','Total_NO_ORDERS','AVG_REVENUE_ALL','AVG_CLV_ALL','TOTAL_REVENUE_ALL','TOTAL_USERS','REPEAT_USERS','NEW_USERS','CHURN_USERS']]
-            
-            
-            r1, c1 = executive_summary_df_final_prev.shape
-            if r1>0 :
-                executive_summary_df_final['Total_NO_ORDERS_Changes'] = round((executive_summary_df_final['Total_NO_ORDERS'] - executive_summary_df_final_prev['Total_NO_ORDERS'])/executive_summary_df_final_prev['Total_NO_ORDERS'],2)*100
-                executive_summary_df_final['AVG_REVENUE_ALL_Changes'] = round((executive_summary_df_final['AVG_REVENUE_ALL'] - executive_summary_df_final_prev['AVG_REVENUE_ALL'])/executive_summary_df_final_prev['AVG_REVENUE_ALL'],2)*100
-                executive_summary_df_final['AVG_CLV_ALL_Changes'] = round((executive_summary_df_final['AVG_CLV_ALL'] - executive_summary_df_final_prev['AVG_CLV_ALL'])/executive_summary_df_final_prev['AVG_CLV_ALL'],2)*100
-                executive_summary_df_final['TOTAL_REVENUE_ALL_Changes'] = round((executive_summary_df_final['TOTAL_REVENUE_ALL'] - executive_summary_df_final_prev['TOTAL_REVENUE_ALL'])/executive_summary_df_final_prev['TOTAL_REVENUE_ALL'],2)*100
-                executive_summary_df_final['TOTAL_USERS_Changes'] = round((executive_summary_df_final['TOTAL_USERS'] - executive_summary_df_final_prev['TOTAL_USERS'])/executive_summary_df_final_prev['TOTAL_USERS'],2)*100
-                executive_summary_df_final['REPEAT_USERS_Changes'] = round((executive_summary_df_final['REPEAT_USERS'] - executive_summary_df_final_prev['REPEAT_USERS'])/executive_summary_df_final_prev['REPEAT_USERS'],2)*100
-                executive_summary_df_final['NEW_USERS_Changes'] = round((executive_summary_df_final['NEW_USERS'] - executive_summary_df_final_prev['NEW_USERS'])/executive_summary_df_final_prev['AVG_REVENUE_ALL'],2)*100
-                executive_summary_df_final['CHURN_USERS_Changes'] = round((executive_summary_df_final['CHURN_USERS'] - executive_summary_df_final_prev['CHURN_USERS'])/executive_summary_df_final_prev['CHURN_USERS'],2)*100
-        else:
-            executive_summary_df_final['Total_NO_ORDERS_Changes'] = '-'
-            executive_summary_df_final['AVG_REVENUE_ALL_Changes'] = '-'
-            executive_summary_df_final['AVG_CLV_ALL_Changes'] = '-'
-            executive_summary_df_final['TOTAL_REVENUE_ALL_Changes'] = '-'
-            executive_summary_df_final['TOTAL_USERS_Changes'] = '-'
-            executive_summary_df_final['REPEAT_USERS_Changes'] = '-'
-            executive_summary_df_final['NEW_USERS_Changes'] = '-'
-            executive_summary_df_final['CHURN_USERS_Changes'] = '-'
-            executive_summary_df_final_prev = pd.DataFrame()
-            executive_summary_df_final_prev["TOTAL_USERS"] = '-'
-            executive_summary_df_final_prev["Total_NO_ORDERS"] = '-'
-            executive_summary_df_final_prev["TOTAL_REVENUE_ALL"] = '-'
-            executive_summary_df_final_prev["AVG_REVENUE_ALL"] = '-'
-            executive_summary_df_final_prev["NEW_USERS"] = '-'
-            executive_summary_df_final_prev["REPEAT_USERS"] = '-'
-            executive_summary_df_final_prev["CHURN_USERS"] = '-'
-            executive_summary_df_final_prev["AVG_CLV_ALL"] = '-'
-
-        executive_summary_df_final.fillna('-', inplace=True)
-        summary_location = "The Sun Inn"
-        executive_summary_dict = {}
-        print("*********************************************************************************")
-        print(executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size)
-        print("*********************************************************************************")
-
-        if executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size != 0:
-
-            executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]
-            executive_summary_dict["customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS_Changes"].tolist()[0] 
-            executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]                 
-
-            executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]  
-            executive_summary_dict["orders_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS_Changes"].tolist()[0]
-            executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
-            executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-            executive_summary_dict["revenue_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL_Changes"].tolist()[0] 
-            executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-            executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]  
-            executive_summary_dict["aov_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL_Changes"].tolist()[0]  
-            executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
-            executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]  
-            executive_summary_dict["new_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS_Changes"].tolist()[0] 
-            executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
-            executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]
-            executive_summary_dict["repeat_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS_Changes"].tolist()[0]  
-            executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
-            executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]  
-            executive_summary_dict["churn_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS_Changes"].tolist()[0]
-            executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
-            executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
-            executive_summary_dict["aclv_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL_Changes"].tolist()[0] 
-            executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
-                
-        print("Dataframe initialization process completed... ")
-        settings.EXECUTIVE_SUM_DICT = executive_summary_dict
-        settings.MODEL_LOAD_FLAG = "True"
-                        
-            
+     
     
-    result = {}
-    result["prediction_graph"] = settings.PREDICTION_GRAPH_DATA
-    age_analytics_df = settings.ANALYTICS_GRAPH_DATAFRAME.copy()
-    revenue_df = settings.REVENUE_GRAPH_DATAFRAME.copy()
+    executive_summary_dict = {}
+    print("*********************************************************************************")
+    print(executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size)
+    print(executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location].size)
+    print("*********************************************************************************")
 
-    all_customer_df = settings.ALL_CUSTOMER_DATAFRAME.copy()
-    loyal_customer_df = settings.LOYAL_CUSTOMER_DATAFRAME.copy()
-    repeat_customer_df = settings.REPEAT_CUSTOMER_DATAFRAME.copy()
-    top_customer_df = settings.TOP_SPENDER_DATAFRAME.copy()
-    low_customer_df = settings.LOW_SPENDER_DATAFRAME.copy()
-    risk_customer_df = settings.RISK_CUSTOMER_DATAFRAME.copy()
-    chrun_customer_df = settings.CHURN_CUSTOMER_DATAFRAME.copy()
-    executive_summary = settings.EXECUTIVE_SUM_DICT
-    location_name = "The Sun Inn"
+    if executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size == 0 :
+        print(" current executive summary data not available")
+        executive_summary_dict["customers_prev"] = "-"             
+        executive_summary_dict["orders_prev"] = "-"   
+        executive_summary_dict["revenue_prev"] = "-"   
+        executive_summary_dict["aov_prev"] = "-"   
+        executive_summary_dict["new_customers_prev"] = "-"   
+        executive_summary_dict["repeat_customers_prev"] = "-"   
+        executive_summary_dict["churn_customers_prev"] = "-"   
+        executive_summary_dict["aclv_customers_prev"] = "-" 
+
+        executive_summary_dict["customers_selected"] = "-"         
+        executive_summary_dict["orders_selected"] = "-"         
+        executive_summary_dict["revenue_selected"] = "-"         
+        executive_summary_dict["aov_selected"] = "-"         
+        executive_summary_dict["new_customers_selected"] = "-"         
+        executive_summary_dict["repeat_customers_selected"] = "-"         
+        executive_summary_dict["churn_customers_selected"] = "-"         
+        executive_summary_dict["aclv_customers_selected"] = "-" 
+        
+        
+    else :
+        print(" current executive summary data available")
+
+        if executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location].size == 0 :
+            print(" previous executive summary data not available")
+            executive_summary_dict["customers_prev"] = "-"               
+            executive_summary_dict["orders_prev"] = "-"   
+            executive_summary_dict["revenue_prev"] = "-"   
+            executive_summary_dict["aov_prev"] = "-"   
+            executive_summary_dict["new_customers_prev"] = "-"   
+            executive_summary_dict["repeat_customers_prev"] = "-"   
+            executive_summary_dict["churn_customers_prev"] = "-"   
+            executive_summary_dict["aclv_customers_prev"] = "-"   
+        else:
+            print(" previous executive summary data available")
+            executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]    
+            executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
+            executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
+            executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
+            executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
+            executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
+
+
+        executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]        
+        executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]          
+        executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0]         
+        executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]          
+        executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]          
+        executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]        
+        executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]          
+        executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
+        
+                     
+    #excutive summary process end.
     
     
     
@@ -893,7 +907,7 @@ def get_time_series_data(request):
     result["unknown_val_of_rev"] = unknown_val_reve
     result["revenue_graph"] = revenue_dic
 
-    result["executive_summary"] = executive_summary    
+    result["executive_summary"] = executive_summary_dict    
     
     
     return JsonResponse(result,safe=False)
@@ -1023,131 +1037,118 @@ def location_based_segment_data(request):
     return JsonResponse(result)
 
 @api_view(["GET"])
-def location_based_excutive_summary(request):
+def location_based_excutive_summary(request):        
 
-        act_start = ''#'2022-01-01 00:00:00'
-        act_end = ''#'2022-04-30 00:00:00'
-        year = 2020
+    #every time process
+
+    #executive summary filter from date & to date
+    act_start = ''#'2022-01-01 00:00:00'
+    act_end = ''#'2022-04-30 00:00:00'
+    year = 2021
+    month = 0
+    custom_filter = True
+    
+    
+    summary_location = "The Sun Inn"
+    if 'location' in request.GET:
+        summary_location = request.query_params["location"]                                                
+
+    if 'year_val' in request.GET:
+        year = int(request.query_params["year_val"])
+        act_start = ''
+        act_end = ''
+    if 'month_val' in request.GET:
+        month = int(request.query_params["month_val"]) 
+
+    if 'start_dt_val' in request.GET:
+        print(type(request.query_params["start_dt_val"]))
+        act_start = str(request.query_params["start_dt_val"]) 
+        print(type(act_start))
+        year = 0
         month = 0
+    if 'end_dt_val' in request.GET:
+        act_end = str(request.query_params["end_dt_val"])                             
+    
+    
+    
+    prev_year = 0
+    prev_month = 0
+    prev_clv_not_found = False
+    cur_clv_not_found = False
+
+    print("*****************************************************************************************")
+    print(act_start)
+    print(act_end)
+    print(month)
+    print(year)
+    print(summary_location)
+    print("*****************************************************************************************")
+
+    
+
+    print("*****************************************************************************************")
+    print(act_start)
+    print(act_end)
+    print("*****************************************************************************************")
+
+    
+
+    prediction_summary_clv_prev = settings.EXECUTIVE_SUMMARY_DATAFRAME.copy()
+    prediction_summary_clv = settings.EXECUTIVE_SUMMARY_DATAFRAME.copy()
+
+
+    if(len(act_start.strip())):
+        startDate = pd.to_datetime(act_start).date()
+        startDate_tmp = pd.to_datetime(act_start).date()
+        prev_start = str(startDate_tmp - pd.DateOffset(years=1))
+        prev_start = pd.to_datetime(prev_start).date()
+        prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] < startDate].index, inplace = True)
+        prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] < prev_start].index, inplace = True)
         custom_filter = True
-        is_filter = False
         
-        summary_location = "The Sun Inn"
-        if 'location' in request.GET:
-            summary_location = request.query_params["location"]                                                
-
-        if 'year_val' in request.GET:
-            year = int(request.query_params["year_val"])
-            act_start = ''
-            act_end = ''
-        if 'month_val' in request.GET:
-            month = int(request.query_params["month_val"]) 
-
-        if 'start_dt_val' in request.GET:
-            print(type(request.query_params["start_dt_val"]))
-            act_start = str(request.query_params["start_dt_val"]) 
-            print(type(act_start))
-            year = 0
-            month = 0
-        if 'end_dt_val' in request.GET:
-            act_end = str(request.query_params["end_dt_val"])                     
-
-        #executive summary filter from date & to date
-        
-        
-        prev_act_start = ''#'2021-01-01 00:00:00'
-        prev_act_end = ''#'2021-04-30 00:00:00'
-        prev_year = 0
-        prev_month = 0
-        prev_clv_not_found = False
-
-        print("llllllllllllllll*****************************************************************************************")
-        print(act_start)
-        print(act_end)
-        print(month)
-        print(year)
-        print(summary_location)
-        print("*****************************************************************************************")
-
-        #Executive Summary Report
-
-        #one time execution
-        #thersold date        
-
-        thersold_date = settings.THERSOLD_MAX_DATE        
-
-        prediction_summary_clv = settings.PREDICTION_CLV_DATAFRAME.copy()
-        thersold = thersold_date.split("-")
-        thersold_yr = int(thersold[0])
-        thersold_mnth = int(thersold[1])
-        thersold_day = int(thersold[2])
-        a_date = datetime.date(thersold_yr, thersold_mnth, thersold_day)
-        prediction_summary_clv['thersold_day'] = a_date
-        prediction_summary_clv['customer_age_days'] = pd.to_timedelta(prediction_summary_clv['customer_age'], unit='D')
-        prediction_summary_clv['OrderDate'] = prediction_summary_clv['thersold_day'] - prediction_summary_clv['customer_age_days']
-        prediction_summary_clv.drop(['thersold_day'],axis=1,inplace=True)
-        prediction_summary_clv.drop(['customer_age_days'],axis=1,inplace=True)
-        prediction_summary_clv_prev = prediction_summary_clv.copy()
-
-        if(len(act_start.strip())):
-            startDate = pd.to_datetime(act_start).date()
-            startDate_tmp = pd.to_datetime(act_start).date()
-            prev_start = str(startDate_tmp - pd.DateOffset(years=1))
-            prev_start = pd.to_datetime(prev_start).date()
-            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] < startDate].index, inplace = True)
-            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] < prev_start].index, inplace = True)
-            
-            if(len(act_end.strip())):
-                endDate = pd.to_datetime(act_end).date()
-                endDate_tmp = pd.to_datetime(act_end).date()
-                prev_end = str(endDate_tmp - pd.DateOffset(years=1))
-                prev_end = pd.to_datetime(prev_end).date()
-                prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] > endDate].index, inplace = True)
-                prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] > prev_end].index, inplace = True)
-                is_filter = True
-            else:
-                custom_filter = False
+        if(len(act_end.strip())):
+            endDate = pd.to_datetime(act_end).date()
+            endDate_tmp = pd.to_datetime(act_end).date()
+            prev_end = str(endDate_tmp - pd.DateOffset(years=1))
+            prev_end = pd.to_datetime(prev_end).date()
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['OrderDate'] > endDate].index, inplace = True)
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['OrderDate'] > prev_end].index, inplace = True)        
         else:
             custom_filter = False
+    else:
+        custom_filter = False
+
+
+    if not custom_filter:    
+        if(year > 0 and month == 0):
+            prev_year = year - 1
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Year'] != year].index, inplace = True)  
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Year'] != prev_year].index, inplace = True)        
             
-
-        prediction_summary_clv['OrderDate'] = pd.to_datetime(prediction_summary_clv['OrderDate'])
-
-        # extract date, month and year from dates
-        prediction_summary_clv['Month'] = [i.month for i in prediction_summary_clv['OrderDate']]
-        prediction_summary_clv['Year'] = [i.year for i in prediction_summary_clv['OrderDate']]
-        prediction_summary_clv['day_of_week'] = [i.dayofweek for i in prediction_summary_clv['OrderDate']]
-        prediction_summary_clv['day_of_year'] = [i.dayofyear for i in prediction_summary_clv['OrderDate']]
-
-        r, c = prediction_summary_clv_prev.shape
-        if r > 0 :
-            prediction_summary_clv_prev['OrderDate'] = pd.to_datetime(prediction_summary_clv_prev['OrderDate'])
-
-            # extract date, month and year from dates
-            prediction_summary_clv_prev['Month'] = [i.month for i in prediction_summary_clv_prev['OrderDate']]
-            prediction_summary_clv_prev['Year'] = [i.year for i in prediction_summary_clv_prev['OrderDate']]
-            prediction_summary_clv_prev['day_of_week'] = [i.dayofweek for i in prediction_summary_clv_prev['OrderDate']]
-            prediction_summary_clv_prev['day_of_year'] = [i.dayofyear for i in prediction_summary_clv_prev['OrderDate']]
-        else:
-            prev_clv_not_found = True  
-            
-        if not custom_filter:
-            if(year > 0):
+        if(year > 0 and month > 0):
+            if(month == 1):
+                prev_month = 12
                 prev_year = year - 1
-                prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Year'] != year].index, inplace = True)  
-                prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Year'] != prev_year].index, inplace = True)        
-                is_filter = True
+            else:                
+                prev_year = year
+                prev_month = month - 1
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Year'] != year].index, inplace = True)  
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Year'] != prev_year].index, inplace = True)    
+            prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Month'] != month].index, inplace = True)
+            prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Month'] != prev_month].index, inplace = True)        
                 
-                if(month > 0):
-                    prev_month = month - 1
-                    prediction_summary_clv.drop(prediction_summary_clv[prediction_summary_clv['Month'] != month].index, inplace = True)
-                    prediction_summary_clv_prev.drop(prediction_summary_clv_prev[prediction_summary_clv_prev['Month'] != prev_month].index, inplace = True)        
-                    is_filter = True
-                    
-        r, c = prediction_summary_clv_prev.shape
-        if r == 0 :
-            prev_clv_not_found = True
+                
+    r, c = prediction_summary_clv_prev.shape
+    if r == 0 :
+        prev_clv_not_found = True
+        
+    r, c = prediction_summary_clv.shape
+    if r == 0 :
+        cur_clv_not_found = True
 
+
+
+    if not cur_clv_not_found:
         #location based avg CLV of All customer
         prediction_summary_all_clv = prediction_summary_clv.groupby(['Location']).agg({"no_visit" : np.sum, "CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
 
@@ -1206,160 +1207,142 @@ def location_based_excutive_summary(request):
         executive_summary_df['TOTAL_USERS'] = executive_summary_df['TOTAL_USERS'] - executive_summary_df['CHURN_USERS']
 
         executive_summary_df_final = executive_summary_df[['Location','Total_NO_ORDERS','AVG_REVENUE_ALL','AVG_CLV_ALL','TOTAL_REVENUE_ALL','TOTAL_USERS','REPEAT_USERS','NEW_USERS','CHURN_USERS']]
+    else:
+        executive_summary_df_final = prediction_summary_clv
+
+    if not prev_clv_not_found:
+        #location based avg CLV of All customer
+        prediction_all_clv_prev = prediction_summary_clv_prev.groupby(['Location']).agg({"no_visit" : np.sum, "CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+
+        #add, rename and remove the column
+        prediction_all_clv_prev['Total_Transaction'] = round(prediction_all_clv_prev['Total_Transaction'],3)
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_ALL"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_ALL"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CtcID" : "TOTAL_USERS"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_ALL"})
+        prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"no_visit" : "Total_NO_ORDERS"})
+
+        executive_summary_df_prev = prediction_all_clv_prev
+
+        #Repeat Customer
+        prediction_repeat_clv_prev = prediction_summary_clv_prev.copy()
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.loc[(prediction_repeat_clv_prev.no_visit >= 2)]
+        prediction_repeat_clv_prev['Total_Transaction'] = prediction_repeat_clv_prev['Transactional Value']
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+        prediction_repeat_clv_prev['Total_Transaction'] = round(prediction_repeat_clv_prev['Total_Transaction'],3)
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_REPEAT"})
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_REPEAT"})
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CtcID" : "REPEAT_USERS"})
+        prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_REPEAT"})
+
+        executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_repeat_clv_prev, on=["Location"])
+
+        #New Customer
+        prediction_new_clv_prev = prediction_summary_clv_prev.copy()
+        prediction_new_clv_prev = prediction_new_clv_prev.loc[(prediction_new_clv_prev.no_visit == 1)]
+        prediction_new_clv_prev['Total_Transaction'] = prediction_new_clv_prev['Transactional Value']
+        prediction_new_clv_prev = prediction_new_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+        prediction_new_clv_prev['Total_Transaction'] = round(prediction_new_clv_prev['Total_Transaction'],3)
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_NEW"})
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_NEW"})
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CtcID" : "NEW_USERS"})
+        prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_NEW"})
+
+        executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_new_clv_prev, on=["Location"])
+
+        #Churn Customer
+        prediction_churn_clv_prev = prediction_summary_clv_prev.copy()
+        prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.no_visit > 1)]
+        cus_total = prediction_churn_clv_prev['CtcID'].size
+        cus_avg_freq = round(prediction_churn_clv_prev['frequency'].sum()/cus_total,3)
+        prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.days_since_last_visit > (3 * cus_avg_freq))]
+        prediction_churn_clv_prev['Total_Transaction'] = prediction_churn_clv_prev['Transactional Value']
+        prediction_churn_clv_prev = prediction_churn_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+        prediction_churn_clv_prev['Total_Transaction'] = round(prediction_churn_clv_prev['Total_Transaction'],3)
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_CHURN"})
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_CHURN"})
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CtcID" : "CHURN_USERS"})
+        prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_CHURN"})
+
+        executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_churn_clv_prev, on=["Location"])
+
+        executive_summary_df_prev['TOTAL_USERS'] = executive_summary_df_prev['TOTAL_USERS'] - executive_summary_df_prev['CHURN_USERS']
+
+        executive_summary_df_final_prev = executive_summary_df_prev[['Location','Total_NO_ORDERS','AVG_REVENUE_ALL','AVG_CLV_ALL','TOTAL_REVENUE_ALL','TOTAL_USERS','REPEAT_USERS','NEW_USERS','CHURN_USERS']]
+    else:
+        executive_summary_df_final_prev = prediction_summary_clv_prev
 
 
-        if not prev_clv_not_found:
-            #location based avg CLV of All customer
-            prediction_all_clv_prev = prediction_summary_clv_prev.groupby(['Location']).agg({"no_visit" : np.sum, "CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
+    # executive_summary_df_final.head()
+    # executive_summary_df_final_prev.head()
+    
+    
+    executive_summary_dict = {}
+    print("*********************************************************************************")
+    print(executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size)
+    print(executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location].size)
+    print("*********************************************************************************")
 
-            #add, rename and remove the column
-            prediction_all_clv_prev['Total_Transaction'] = round(prediction_all_clv_prev['Total_Transaction'],3)
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_ALL"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_ALL"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CtcID" : "TOTAL_USERS"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_ALL"})
-            prediction_all_clv_prev = prediction_all_clv_prev.rename(columns={"no_visit" : "Total_NO_ORDERS"})
+    if executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size == 0 :
+        print(" current executive summary data not available")
+        executive_summary_dict["customers_prev"] = "-"             
+        executive_summary_dict["orders_prev"] = "-"   
+        executive_summary_dict["revenue_prev"] = "-"   
+        executive_summary_dict["aov_prev"] = "-"   
+        executive_summary_dict["new_customers_prev"] = "-"   
+        executive_summary_dict["repeat_customers_prev"] = "-"   
+        executive_summary_dict["churn_customers_prev"] = "-"   
+        executive_summary_dict["aclv_customers_prev"] = "-" 
 
-            executive_summary_df_prev = prediction_all_clv_prev
-
-            #Repeat Customer
-            prediction_repeat_clv_prev = prediction_summary_clv_prev.copy()
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.loc[(prediction_repeat_clv_prev.no_visit >= 2)]
-            prediction_repeat_clv_prev['Total_Transaction'] = prediction_repeat_clv_prev['Transactional Value']
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
-            prediction_repeat_clv_prev['Total_Transaction'] = round(prediction_repeat_clv_prev['Total_Transaction'],3)
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_REPEAT"})
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_REPEAT"})
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CtcID" : "REPEAT_USERS"})
-            prediction_repeat_clv_prev = prediction_repeat_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_REPEAT"})
-
-            executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_repeat_clv_prev, on=["Location"])
-
-            #New Customer
-            prediction_new_clv_prev = prediction_summary_clv_prev.copy()
-            prediction_new_clv_prev = prediction_new_clv_prev.loc[(prediction_new_clv_prev.no_visit == 1)]
-            prediction_new_clv_prev['Total_Transaction'] = prediction_new_clv_prev['Transactional Value']
-            prediction_new_clv_prev = prediction_new_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
-            prediction_new_clv_prev['Total_Transaction'] = round(prediction_new_clv_prev['Total_Transaction'],3)
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_NEW"})
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_NEW"})
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CtcID" : "NEW_USERS"})
-            prediction_new_clv_prev = prediction_new_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_NEW"})
-
-            executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_new_clv_prev, on=["Location"])
-
-            #Churn Customer
-            prediction_churn_clv_prev = prediction_summary_clv_prev.copy()
-            prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.no_visit > 1)]
-            cus_total = prediction_churn_clv_prev['CtcID'].size
-            cus_avg_freq = round(prediction_churn_clv_prev['frequency'].sum()/cus_total,3)
-            prediction_churn_clv_prev = prediction_churn_clv_prev.loc[(prediction_churn_clv_prev.days_since_last_visit > (3 * cus_avg_freq))]
-            prediction_churn_clv_prev['Total_Transaction'] = prediction_churn_clv_prev['Transactional Value']
-            prediction_churn_clv_prev = prediction_churn_clv_prev.groupby(['Location']).agg({"CLV_3M" : np.mean, "Transactional Value" : np.mean, "Total_Transaction" : np.sum, "CtcID" : np.size}).reset_index()
-            prediction_churn_clv_prev['Total_Transaction'] = round(prediction_churn_clv_prev['Total_Transaction'],3)
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Total_Transaction" : "TOTAL_REVENUE_CHURN"})
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"Transactional Value" : "AVG_REVENUE_CHURN"})
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CtcID" : "CHURN_USERS"})
-            prediction_churn_clv_prev = prediction_churn_clv_prev.rename(columns={"CLV_3M" : "AVG_CLV_CHURN"})
-
-            executive_summary_df_prev = pd.merge(executive_summary_df_prev, prediction_churn_clv_prev, on=["Location"])
-
-            executive_summary_df_prev['TOTAL_USERS'] = executive_summary_df_prev['TOTAL_USERS'] - executive_summary_df_prev['CHURN_USERS']
-
-            executive_summary_df_final_prev = executive_summary_df_prev[['Location','Total_NO_ORDERS','AVG_REVENUE_ALL','AVG_CLV_ALL','TOTAL_REVENUE_ALL','TOTAL_USERS','REPEAT_USERS','NEW_USERS','CHURN_USERS']]
-            
-            
-            r1, c1 = executive_summary_df_final_prev.shape
-            if r1>0 :
-                executive_summary_df_final['Total_NO_ORDERS_Changes'] = round((executive_summary_df_final['Total_NO_ORDERS'] - executive_summary_df_final_prev['Total_NO_ORDERS'])/executive_summary_df_final_prev['Total_NO_ORDERS'],2)*100
-                executive_summary_df_final['AVG_REVENUE_ALL_Changes'] = round((executive_summary_df_final['AVG_REVENUE_ALL'] - executive_summary_df_final_prev['AVG_REVENUE_ALL'])/executive_summary_df_final_prev['AVG_REVENUE_ALL'],2)*100
-                executive_summary_df_final['AVG_CLV_ALL_Changes'] = round((executive_summary_df_final['AVG_CLV_ALL'] - executive_summary_df_final_prev['AVG_CLV_ALL'])/executive_summary_df_final_prev['AVG_CLV_ALL'],2)*100
-                executive_summary_df_final['TOTAL_REVENUE_ALL_Changes'] = round((executive_summary_df_final['TOTAL_REVENUE_ALL'] - executive_summary_df_final_prev['TOTAL_REVENUE_ALL'])/executive_summary_df_final_prev['TOTAL_REVENUE_ALL'],2)*100
-                executive_summary_df_final['TOTAL_USERS_Changes'] = round((executive_summary_df_final['TOTAL_USERS'] - executive_summary_df_final_prev['TOTAL_USERS'])/executive_summary_df_final_prev['TOTAL_USERS'],2)*100
-                executive_summary_df_final['REPEAT_USERS_Changes'] = round((executive_summary_df_final['REPEAT_USERS'] - executive_summary_df_final_prev['REPEAT_USERS'])/executive_summary_df_final_prev['REPEAT_USERS'],2)*100
-                executive_summary_df_final['NEW_USERS_Changes'] = round((executive_summary_df_final['NEW_USERS'] - executive_summary_df_final_prev['NEW_USERS'])/executive_summary_df_final_prev['AVG_REVENUE_ALL'],2)*100
-                executive_summary_df_final['CHURN_USERS_Changes'] = round((executive_summary_df_final['CHURN_USERS'] - executive_summary_df_final_prev['CHURN_USERS'])/executive_summary_df_final_prev['CHURN_USERS'],2)*100
-        else:
-            executive_summary_df_final['Total_NO_ORDERS_Changes'] = '-'
-            executive_summary_df_final['AVG_REVENUE_ALL_Changes'] = '-'
-            executive_summary_df_final['AVG_CLV_ALL_Changes'] = '-'
-            executive_summary_df_final['TOTAL_REVENUE_ALL_Changes'] = '-'
-            executive_summary_df_final['TOTAL_USERS_Changes'] = '-'
-            executive_summary_df_final['REPEAT_USERS_Changes'] = '-'
-            executive_summary_df_final['NEW_USERS_Changes'] = '-'
-            executive_summary_df_final['CHURN_USERS_Changes'] = '-'
-            executive_summary_df_final_prev = pd.DataFrame()
-            executive_summary_df_final_prev["Location"] = '-'
-            executive_summary_df_final_prev["TOTAL_USERS"] = '-'
-            executive_summary_df_final_prev["Total_NO_ORDERS"] = '-'
-            executive_summary_df_final_prev["TOTAL_REVENUE_ALL"] = '-'
-            executive_summary_df_final_prev["AVG_REVENUE_ALL"] = '-'
-            executive_summary_df_final_prev["NEW_USERS"] = '-'
-            executive_summary_df_final_prev["REPEAT_USERS"] = '-'
-            executive_summary_df_final_prev["CHURN_USERS"] = '-'
-            executive_summary_df_final_prev["AVG_CLV_ALL"] = '-'
-
-        executive_summary_df_final.fillna('-', inplace=True)        
-        executive_summary_dict = {}
-
-        print(executive_summary_df_final_prev)
-        print("*************************************************************************")
-        print(executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size)
-        print(executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location].size)
-        print("*************************************************************************")
+        executive_summary_dict["customers_selected"] = "-"         
+        executive_summary_dict["orders_selected"] = "-"         
+        executive_summary_dict["revenue_selected"] = "-"         
+        executive_summary_dict["aov_selected"] = "-"         
+        executive_summary_dict["new_customers_selected"] = "-"         
+        executive_summary_dict["repeat_customers_selected"] = "-"         
+        executive_summary_dict["churn_customers_selected"] = "-"         
+        executive_summary_dict["aclv_customers_selected"] = "-" 
         
+        
+    else :
+        print(" current executive summary data available")
 
-        if executive_summary_df_final[executive_summary_df_final["Location"] == summary_location].size != 0 :
+        if executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location].size == 0 :
+            print(" previous executive summary data not available")
+            executive_summary_dict["customers_prev"] = "-"               
+            executive_summary_dict["orders_prev"] = "-"   
+            executive_summary_dict["revenue_prev"] = "-"   
+            executive_summary_dict["aov_prev"] = "-"   
+            executive_summary_dict["new_customers_prev"] = "-"   
+            executive_summary_dict["repeat_customers_prev"] = "-"   
+            executive_summary_dict["churn_customers_prev"] = "-"   
+            executive_summary_dict["aclv_customers_prev"] = "-"   
+        else:
+            print(" previous executive summary data available")
+            executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]    
+            executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
+            executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
+            executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
+            executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
+            executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
+            executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
 
-            if executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location].size == 0 :
-                executive_summary_dict["customers_prev"] = "-"   
-                executive_summary_dict["customers_prev"] = "-"   
-                executive_summary_dict["orders_prev"] = "-"   
-                executive_summary_dict["revenue_prev"] = "-"   
-                executive_summary_dict["aov_prev"] = "-"   
-                executive_summary_dict["new_customers_prev"] = "-"   
-                executive_summary_dict["repeat_customers_prev"] = "-"   
-                executive_summary_dict["churn_customers_prev"] = "-"   
-                executive_summary_dict["aclv_customers_prev"] = "-"   
-            else:
-                executive_summary_dict["customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]    
-                executive_summary_dict["orders_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0] 
-                executive_summary_dict["revenue_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-                executive_summary_dict["aov_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0] 
-                executive_summary_dict["new_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["NEW_USERS"].tolist()[0] 
-                executive_summary_dict["repeat_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]  
-                executive_summary_dict["churn_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["CHURN_USERS"].tolist()[0] 
-                executive_summary_dict["aclv_customers_prev"] = executive_summary_df_final_prev[executive_summary_df_final_prev["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0] 
 
-
-            executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]
-            executive_summary_dict["customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS_Changes"].tolist()[0] 
-                         
-
-            executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]  
-            executive_summary_dict["orders_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS_Changes"].tolist()[0]
-            
-            executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0] 
-            executive_summary_dict["revenue_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL_Changes"].tolist()[0] 
-            
-            executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]  
-            executive_summary_dict["aov_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL_Changes"].tolist()[0]  
-            
-            executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]  
-            executive_summary_dict["new_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS_Changes"].tolist()[0] 
-            
-            executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]
-            executive_summary_dict["repeat_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS_Changes"].tolist()[0]  
-            
-            executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]  
-            executive_summary_dict["churn_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS_Changes"].tolist()[0]
-            
-            executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
-            executive_summary_dict["aclv_customers_changes"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL_Changes"].tolist()[0] 
-            
-        result = {}
-        result["executive_summary"] = executive_summary_dict
-        return JsonResponse(result)
+        executive_summary_dict["customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_USERS"].tolist()[0]        
+        executive_summary_dict["orders_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["Total_NO_ORDERS"].tolist()[0]          
+        executive_summary_dict["revenue_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["TOTAL_REVENUE_ALL"].tolist()[0]         
+        executive_summary_dict["aov_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_REVENUE_ALL"].tolist()[0]          
+        executive_summary_dict["new_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["NEW_USERS"].tolist()[0]          
+        executive_summary_dict["repeat_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["REPEAT_USERS"].tolist()[0]        
+        executive_summary_dict["churn_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["CHURN_USERS"].tolist()[0]          
+        executive_summary_dict["aclv_customers_selected"] = executive_summary_df_final[executive_summary_df_final["Location"] == summary_location]["AVG_CLV_ALL"].tolist()[0]  
+                          
+    #excutive summary process end.        
+        
+    result = {}
+    result["executive_summary"] = executive_summary_dict
+    return JsonResponse(result)
 
 
 @api_view(["GET"])
