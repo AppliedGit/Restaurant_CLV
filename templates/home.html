@@ -605,7 +605,7 @@
                     latitude: 51.606,
                     longitude: -0.623,
                     fillKey: "MINOR",
-                    radius: 5.6711,
+                    radius: 56.711,
                     state: "Brasserie Blanc Beaconsfield",
                     averageCLV: 161.46,
                     loyalCustomerPercentage: 8.9,
@@ -617,7 +617,7 @@
                     latitude: 50.715,
                     longitude: -1.882,
                     fillKey: "MINOR",
-                    radius: 2.18391,
+                    radius: 21.8391,
                     state: "Brasserie Blanc Bournemouth",
                     averageCLV: 129.78,
                     loyalCustomerPercentage: 4.5,
@@ -1219,8 +1219,23 @@
                                     display: true, text: 'Day of the Week'
                                 }
                             }
-                        },
-                    },
+                        },plugins: {
+                            zoom: {
+                                zoom: {
+                                    wheel: {
+                                        enabled: false,
+                                    },
+                                    drag:{
+                                        enabled:true
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: 'xy',
+                                }
+                            }
+                        }
+                    }, 
                 });
             });
 
@@ -1286,8 +1301,12 @@
                             zoom: {
                                 zoom: {
                                     wheel: {
-                                        enabled: true,
+                                        enabled: false,
                                     },
+                                    drag:{
+                                        enabled:true
+                                    },
+                                   
                                     pinch: {
                                         enabled: true
                                     },
@@ -1297,8 +1316,11 @@
                         }
                     }
                 });
-                $("#test").click(function () {
+                $("#ts_series_reset").click(function () {
                     prediction_graph.resetZoom();
+                });
+                $("#revenue_reset").click(function () {
+                    revenue_graph.resetZoom();
                 });
             });
 
@@ -1725,7 +1747,7 @@
                 bubble_map.bubbles(bubbles_clv, {
                     popupTemplate: function (geo, data) {
 
-                        return `<div class="hoverinfo"><b>Restaurant</b>: ${data.state}<br/> <b>Average CLV</b>: ${data.averageCLV}<br/> <b>Average Loyal CLV</b>: ${data.averageLoyalCLV}<br/> <b>Percentage of Loyal Customer </b>: ${data.loyalCustomerPercentage}%<br/> <b>Number of New Customer</b>: ${data.numberOfNewCustomer}<br/> <b>Number of Repeat Customer</b>: ${data.numberOfRepeatCustomer}<br/> <b>Revenue From Repeat Customer</b>: ${data.revenueFromRepeatCustomer}<br/> </div>`;
+                        return `<div class="hoverinfo"><b>Restaurant</b>: ${data.state}<br/> <b>Average CLV</b>: ${data.averageCLV} (€)<br/> <b>Average Loyal CLV</b>: ${data.averageLoyalCLV} (€)<br/> <b>Percentage of Loyal Customer </b>: ${data.loyalCustomerPercentage}%<br/> <b>Number of New Customer</b>: ${data.numberOfNewCustomer}<br/> <b>Number of Repeat Customer</b>: ${data.numberOfRepeatCustomer}<br/> <b>Revenue From Repeat Customer</b>: ${data.revenueFromRepeatCustomer} (€)<br/> </div>`;
                     }
                 });
             }
@@ -1734,7 +1756,7 @@
                 bubble_map.bubbles(bubbles_revenue, {
                     popupTemplate: function (geo, data) {
 
-                        return `<div class="hoverinfo"><b>Restaurant</b>: ${data.state}<br/> <b>Average CLV</b>: ${data.averageCLV}<br/> <b>Average Loyal CLV</b>: ${data.averageLoyalCLV}<br/> <b>Percentage of Loyal Customer </b>: ${data.loyalCustomerPercentage}%<br/> <b>Number of New Customer</b>: ${data.numberOfNewCustomer}<br/> <b>Number of Repeat Customer</b>: ${data.numberOfRepeatCustomer}<br/> <b>Revenue From Repeat Customer</b>: ${data.revenueFromRepeatCustomer}<br/> </div>`;
+                        return `<div class="hoverinfo"><b>Restaurant</b>: ${data.state}<br/> <b>Average CLV</b>: ${data.averageCLV} (€)<br/> <b>Average Loyal CLV</b>: ${data.averageLoyalCLV} (€)<br/> <b>Percentage of Loyal Customer </b>: ${data.loyalCustomerPercentage}%<br/> <b>Number of New Customer</b>: ${data.numberOfNewCustomer}<br/> <b>Number of Repeat Customer</b>: ${data.numberOfRepeatCustomer}<br/> <b>Revenue From Repeat Customer</b>: ${data.revenueFromRepeatCustomer} (€)<br/> </div>`;
                     }
                 });
             }
@@ -1777,7 +1799,7 @@
                                         <div class="col-md-8">
                                             <h6 class="card-title text-primary">Customer Segmentations <label
                                                     id="restaurant_name"></label> <label id="cs_selectionDate"
-                                                    class="text-info">( 01-08-2019 -
+                                                    class="text-secondary">( 01-08-2019 -
                                                     28-02-2022 )</label> </h6>
                                         </div>
                                         <div class="col-md-4">
@@ -1883,14 +1905,14 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-10">
-                                            <h6 class="card-title text-primary">Customer Life Time Prediction Vs Actual
-                                                OverTime <label class="text-info" id="ca_fromToDate">( 01-05-2021 -
+                                            <h6 class="card-title text-primary">Customer Life Time Value Prediction <label class="text-danger">(vs)</label> Actual
+                                                OverTime <label class="text-secondary" id="ca_fromToDate">( 01-05-2021 -
                                                     30-05-2022 )</label>
                                             </h6>
 
                                         </div>
                                         <div class="col-md-2 ">
-                                            <button id="test" class="btn btn-success btn-sm"> Reset </button>
+                                            <button id="ts_series_reset" class="btn btn-success btn-sm"> Reset Zoom</button>
                                         </div>
                                     </div>
                                     <hr>
@@ -1940,13 +1962,14 @@
                                     <canvas class="chart" width="400" height="200"></canvas>
                                     <hr>
                                     <div class="row">
-                                        <div class="col-md  -8">
+                                        <div class="col-md-7">
                                             <h6 class="card-title text-primary">Revenue Distribution Over Time</h6>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-5">
                                             <select id="revenue_location_list"
                                                 onchange="location_based_revenue_graph();" data-max-options="5"
                                                 data-live-search="true"></select>
+                                                <button id="revenue_reset" class="btn btn-success btn-sm"> Reset Zoom</button>
                                         </div>
                                     </div>
                                     <hr>
